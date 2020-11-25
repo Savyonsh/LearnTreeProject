@@ -12,7 +12,7 @@ public class Main {
     private static File trainingSet;
     private static File outputTree;
     private static List<Picture> validPicSet;
-
+    //fjkl
     public static void main(String[] args) {
         version = Integer.parseInt(args[0]);
         validPercent = Double.parseDouble(args[1]);
