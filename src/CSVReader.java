@@ -13,11 +13,11 @@ public class CSVReader  {
     private Stream<String> lines;
 
     public CSVReader (String csvFile) throws IOException {
-
         this.csvFile = csvFile;
         try {
             br = new BufferedReader(new FileReader(csvFile));
-            lines = br.lines();
+            nextLine = br.readLine();
+            //lines = br.lines();
         }catch (FileNotFoundException e) {
             System.out.println("There was a problem with one of the files.");
         }
@@ -45,6 +45,25 @@ public class CSVReader  {
             if (nextLine == null)
                 hasNextLine = false;
             return pixelVector;
+        }
+        else
+        {
+            throw new RuntimeException("no more");
+        }
+
+    }
+
+    public Picture getNextPicture() throws IOException {
+        int label;
+        int[] pixelVector = new int[VEC_SIZE];
+        if (nextLine != null) {
+            String[] pixelVectorStr = nextLine.split(",");
+            label = Integer.parseInt(pixelVectorStr[0]);
+            for (int i = 1; i < VEC_SIZE; i++) {
+                pixelVector[i] = Integer.parseInt(pixelVectorStr[i]);
+            }
+            hasNextLine = (nextLine = br.readLine()) != null;
+            return new Picture(label, pixelVector);
         }
         else
         {

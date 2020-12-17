@@ -1,7 +1,7 @@
 public class Picture {
 
-    private int label;
-    private int[] pixels;
+    int label;
+    int[] pixels;
 
     public Picture(int label, int[] pixels ){
         this.label = label;

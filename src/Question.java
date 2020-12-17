@@ -1,15 +1,13 @@
-
-
 public class Question {
-    public int pixelNum;
-    public Question(int num){
-        pixelNum = num;
+    int pixelNum;
+    int label;
+
+    public Question(int label, int pixelNum){
+        this.pixelNum = pixelNum;
+        this.label = label;
     }
 
-    public boolean ask(int[] arr){
-        if (arr[pixelNum] >= 128){
-            return true;
-        }
-        return false;
+    public boolean ask(int[] arr) {
+        return arr[pixelNum] >= 128;
     }
 }
