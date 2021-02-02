@@ -114,6 +114,8 @@ public class Tree {
         if(bestLeaf != null) {
             bestLeaf.checkingForEntropy(bestQuestion);
             leaves.remove(bestLeaf);
+            bestLeaf.leftTree.parent = bestLeaf;
+            bestLeaf.rightTree.parent = bestLeaf;
             leaves.add(bestLeaf.leftTree);
             leaves.add(bestLeaf.rightTree);
 
