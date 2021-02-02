@@ -11,6 +11,7 @@ public class Main {
     private static File outputTree;
     private static List<Picture> validationSet;
     private static List<Picture> trainingSet;
+    private static double bestSizeTree;
 
     public static void main(String[] args) {
         version = Integer.parseInt(args[0]);
@@ -32,6 +33,26 @@ public class Main {
                     trainingSet.add(myReader.getNextPicture());
             }
             myReader.close();
+            double bestSize = 0;
+            double bestEntropy = Integer.MAX_VALUE;
+            for (int i = 1; i <= maxPowTwo; i++) {
+                double size =  Math.pow(2, i);
+                Tree currentTree = new Tree(validationSet);
+                Tree.leaves.add(currentTree);
+                 do{
+                     currentTree.act();
+                 } while (currentTree.getSize() <size);
+               if(currentTree.getEntropy() < bestEntropy){
+                   bestSize = size;
+               }
+            }
+            System.out.println("Best Size is: " + bestSize + "\nwith Entropy: " + bestEntropy);
+            bestSizeTree = bestSize;
+
+            /*
+             * to pass with the validation set to find the best tree size
+             * later, pass with the training set to create the actual tree
+             * */
         } catch (FileNotFoundException e) {
             System.out.println("There is a problem with the training set.");
             e.printStackTrace();

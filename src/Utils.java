@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.List;
 
 public class Utils {
 
@@ -35,6 +36,33 @@ public class Utils {
         }
 
         return res;
+    }
+
+    static int[] countingPics(List<Picture> picSet){
+        int[] arr = new int[10];
+        for (Picture pic: picSet) {
+            arr[pic.label]++;
+        }
+        return arr;
+    }
+
+    static int getMaxIndex(int[] arr){
+        int max = 0;
+        for (int i = 1; i < arr.length; i++) {
+            if(arr[i]>= arr[max])
+                max = i;
+        }
+        return max;
+    }
+
+    static double calculateEntropy(int[] arr){
+        double entropy =0;
+        double nl = Arrays.stream(arr).sum();
+        for(int nli : arr) {
+            double log = Math.log( nli / nl);
+            entropy += (nli / nl) * log;
+        }
+        return entropy;
     }
 
 }
