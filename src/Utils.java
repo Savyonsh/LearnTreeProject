@@ -3,6 +3,11 @@ import java.util.List;
 
 public class Utils {
 
+    public static final int VEC_SIZE = 785;
+
+    static int mostFrequent(int[] arr) {
+        return mostFrequent(arr, arr.length);
+    }
     static int mostFrequent(int[] arr, int n)
     {
         // Sort the array
@@ -55,12 +60,12 @@ public class Utils {
         return max;
     }
 
-    static double calculateEntropy(int[] arr){
-        double entropy =0;
+    static double calculateEntropy(int[] arr) {
+        double entropy = 0;
         double nl = Arrays.stream(arr).sum();
-        for(int nli : arr) {
-            if(nli != 0) {
-                double log = Math.log(nl/ nli);
+        for (int nli : arr) {
+            if (nli != 0) {
+                double log = Math.log(nl / nli);
                 entropy += (nli / nl) * log;
             }
         }

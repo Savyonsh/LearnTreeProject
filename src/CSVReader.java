@@ -14,7 +14,6 @@ import java.util.stream.Stream;
 
 public class CSVReader {
 
-    public final int VEC_SIZE = 785;
     private BufferedReader br = null;
     private int lineNum = 0;
     private boolean hasNextLine = true;
@@ -65,14 +64,14 @@ public class CSVReader {
 
     public Picture getNextPicture() throws IOException {
         int label;
-        int[] pixelVector = new int[VEC_SIZE];
+        int[] pixelVector = new int[Utils.VEC_SIZE];
         if (nextLine != null) {
 
             label = nextLine.charAt(0) - 48;
             int pixel = 0;
             int index = 0;
-            for (int i = 2; i < VEC_SIZE; i++) {
-                if(nextLine.charAt(i) == ',') {
+            for (int i = 2; i < Utils.VEC_SIZE; i++) {
+                if (nextLine.charAt(i) == ',') {
                     pixelVector[index++] = pixel;
                     pixel = 0;
                     continue;

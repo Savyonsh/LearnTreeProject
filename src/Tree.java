@@ -31,6 +31,7 @@ public class Tree {
 
     /**
      * This method is called by a leaf and it splits it to two different leaves and it enlarged the whole tree.
+     *
      * @param pixel the condition for the leaf to be splitted by.
      */
     private void creatingTwoLeaves(int pixel) {
@@ -47,11 +48,12 @@ public class Tree {
 
     /**
      * This method split the pictureSet of the node to two different pictureSets by a condition
+     *
      * @param pixel the condition
-     * @param left an empty list to be filled with picture from the pictureSet that the condition is applied to them
+     * @param left  an empty list to be filled with picture from the pictureSet that the condition is applied to them
      * @param right an empty list to be filled with picture from the pictureSet that the condition isn't applied to them
      */
-    private void splitPicListByQuestion(int pixel, List<Picture> left, List<Picture> right){
+    private void splitPicListByQuestion(int pixel, List<Picture> left, List<Picture> right) {
         Question quest = new Question(pixel);
         for (Picture pic : picturesSet) {
             if (quest.ask(pic.pixels))
@@ -63,24 +65,26 @@ public class Tree {
 
     /**
      * This method calculate the entropy of a node with two leaves
-     * @param nl The amount of picture that get to the root node
-     * @param leftLabels The labels of the pictures that goes to the left leaf
+     *
+     * @param nl          The amount of picture that get to the root node
+     * @param leftLabels  The labels of the pictures that goes to the left leaf
      * @param rightLabels The labels of the pictures that goes to the right leaf
      * @return the entropy of the root node
      */
-    private double calculatingEntropy(double nl, int[] leftLabels, int[] rightLabels){
+    private double calculatingEntropy(double nl, int[] leftLabels, int[] rightLabels) {
         double entropy = 0;
         double leftEntropy = Utils.calculateEntropy(leftLabels);
         double nla = Arrays.stream(leftLabels).sum();
         double rightEntropy = Utils.calculateEntropy(rightLabels);
         double nlb = Arrays.stream(rightLabels).sum();
-        entropy += leftEntropy*nla/nl;
-        entropy += rightEntropy*nlb/nl;
+        entropy += leftEntropy * nla / nl;
+        entropy += rightEntropy * nlb / nl;
         return entropy;
     }
 
     /**
      * This method find the best question for a specific leaf, means it only been called by a leaf.
+     *
      * @return The best entropy possible for this leaf.
      * Side-effect: changes the condition-node of the leaf, so if the root chose this leaf to be the best,
      * it will know what is the question.
@@ -101,7 +105,7 @@ public class Tree {
                 List<Picture> picsLeft = new LinkedList<>();
                 List<Picture> picsRight = new LinkedList<>();
                 splitPicListByQuestion(i, picsLeft, picsRight);
-                double nl =  Arrays.stream(this.labels).sum();
+                double nl = Arrays.stream(this.labels).sum();
                 double newEntropy = calculatingEntropy(nl, Utils.countingPics(picsLeft), Utils.countingPics(picsRight));
 
                 if (newEntropy < minEntropy) {
@@ -137,7 +141,7 @@ public class Tree {
                 bestLeaf = leaf;
                 bestQuestion = leaf.nodeCondition.pixelNum;
             }
-    }
+        }
 
         if (bestLeaf != null) {
             this.totalIG += bestIG;
@@ -146,8 +150,17 @@ public class Tree {
         }
     }
 
+    public double getTotalEntropy() {
+        double totalEntropy = 0;
+        for (Tree leaf : leaves) {
+            totalEntropy += Utils.calculateEntropy(leaf.labels);
+        }
+        return totalEntropy;
+    }
+
     /**
      * This method go over all the parents of a leaf and check which questions were asked before.
+     *
      * @return list of integers of al the pixel that were asked about in the parents nodes.
      */
     public List<Integer> usedPixels() {
@@ -163,6 +176,7 @@ public class Tree {
     /**
      * This method calculate the size of the entire tree by calculating the size of each subtree.
      * The size is the amount of internal nodes, as described in the assigment.
+     *
      * @return the size of the tree - used for recursion.
      */
     private double getSize() {
@@ -172,7 +186,7 @@ public class Tree {
             leftSize = this.leftTree.getSize();
         if (this.rightTree != null)
             rightSize = this.rightTree.getSize();
-        if(this.rightTree != null || this.leftTree != null)
+        if (this.rightTree != null || this.leftTree != null)
             this.treeSize = 1 + leftSize + rightSize;
         else
             this.treeSize = 0;
@@ -193,5 +207,23 @@ public class Tree {
             str = this.nodeCondition.toString() + "\n" + leftStr + "\n" + rightStr;
         }
         return str;
+    }
+
+    /** Function that goes over all the leaves and
+     * counts all the examples that landed there, who matches
+     * the label in the leaf.
+     * @return the percentage of matched examples. i.e how much the tree predicted correctly.
+     */
+    public double getSuccessRate() {
+        double matchedExamples = 0;
+        double totalExamples = 0;
+        for (Tree leaf : leaves) {
+            for (Picture picture: leaf.picturesSet) {
+                if(picture.label == leaf.label)
+                    matchedExamples++;
+                totalExamples++;
+            }
+        }
+        return matchedExamples / totalExamples;
     }
 }

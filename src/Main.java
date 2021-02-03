@@ -1,6 +1,8 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 public class Main {
@@ -11,9 +13,9 @@ public class Main {
     private static File outputTree;
     private static List<Picture> validationSet;
     private static List<Picture> trainingSet;
-    private static double bestSizeTree;
 
     public static void main(String[] args) {
+        Instant start = Instant.now();
         version = Integer.parseInt(args[0]);
         validPercent = Double.parseDouble(args[1]);
         //validPercent = validPercent / 100;
@@ -24,17 +26,19 @@ public class Main {
         Random random = new Random();
         try {
             CSVReader myReader = new CSVReader(args[3]);
-//            int validSize = (int) Math.ceil(validPercent * myReader.getNumLines());
             while (myReader.hasNextLine()) {
+                Picture picture = myReader.getNextPicture();
                 int randomizeNumber = random.nextInt(100);
                 if (randomizeNumber <= validPercent)
-                    validationSet.add(myReader.getNextPicture());
+                    validationSet.add(picture);
                 else
-                    trainingSet.add(myReader.getNextPicture());
+                    trainingSet.add(picture);
+
+
             }
             myReader.close();
             double bestSize = 0;
-            double bestIG = Integer.MIN_VALUE;
+            double bestSuccessRate = Double.MIN_VALUE;
             for (int i = 0; i <= maxPowTwo; i++) {
                 double size = Math.pow(2, i);
                 Tree currentTree = new Tree(validationSet, null);
@@ -43,19 +47,29 @@ public class Main {
                 do {
                     currentTree.act();
                 } while (currentTree.treeSize < size);
-                double IG = currentTree.totalIG;
-                if (IG > bestIG) {
+                double currentSuccessRate = currentTree.getSuccessRate();
+                if (currentSuccessRate > bestSuccessRate) {
                     bestSize = size;
-                    bestIG = IG;
+                    bestSuccessRate = currentSuccessRate;
                 }
             }
-            System.out.println("Best Size is: " + bestSize + "\nwith IG: " + bestIG);
-            bestSizeTree = bestSize;
 
-            /*
-             * to pass with the validation set to find the best tree size
-             * later, pass with the training set to create the actual tree
-             * */
+            System.out.println("debug: best size: " + bestSize);
+            System.out.println("debug: successRate: " + bestSuccessRate);
+
+            /*Tree predicationTree = new Tree(trainingSet, null);
+            Tree.leaves.add(predicationTree);
+            do {
+                predicationTree.act();
+            } while (predicationTree.treeSize < bestSize);
+
+            System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
+            System.out.println("num: " + trainingSet.size());
+            System.out.println("error: " + (100 - Math.round(predicationTree.getSuccessRate() * 100)));
+            System.out.println("size: " + bestSize);
+
+*/
+
         } catch (FileNotFoundException e) {
             System.out.println("There is a problem with the training set.");
             e.printStackTrace();
@@ -63,6 +77,5 @@ public class Main {
             System.out.println("There is a problem with I/O.");
             e.printStackTrace();
         }
-        Utils.mostFrequent(trainingSet.stream().mapToInt(picture -> picture.label).toArray(), trainingSet.size());
     }
 }
