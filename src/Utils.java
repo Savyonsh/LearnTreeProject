@@ -51,6 +51,22 @@ public class Utils {
         return arr;
     }
 
+
+    static int getLabelsData(List<Picture> picSet, int[] output, int[] oFrequentLabel){
+        int sum = 0;
+        int maxLabelValue = Integer.MIN_VALUE;
+        for (Picture pic: picSet) {
+            output[pic.label]++;
+            if(output[pic.label] > maxLabelValue)
+            {
+                maxLabelValue = output[pic.label];
+                oFrequentLabel[0] = pic.label;
+            }
+            sum++;
+        }
+        return sum;
+    }
+
     static int getMaxIndex(int[] arr){
         int max = 0;
         for (int i = 1; i < arr.length; i++) {

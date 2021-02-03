@@ -9,23 +9,32 @@ public class Tree {
     Tree rightTree;
     Question nodeCondition;
     int[] labels;
+    int labelSum;
     List<Picture> picturesSet;
     int label;
-    double treeSize;
+    double innerNode;
     double totalIG;
-
+    List<Integer> usedPixels;
 
     public Tree(List<Picture> picturesSet, Tree parent) {
         this.parent = parent;
-        this.leftTree = null;
-        this.rightTree = null;
-        this.nodeCondition = null;
+        leftTree = null;
+        rightTree = null;
+        nodeCondition = null;
         this.picturesSet = picturesSet;
-        this.labels = Utils.countingPics(picturesSet);
-        this.label = Utils.getMaxIndex(labels);
-        this.getSize();
+        usedPixels = new LinkedList<>();
+        labels = new int[10];
+        setLabelsInformation();
+/*        this.labels =  Utils.countingPics(picturesSet);
+        this.label = Utils.getMaxIndex(labels);*/
+        if (parent != null)
+            usedPixels.add(parent.nodeCondition.pixelNum);
+        //getSize();
+         //= 1;
+
+        innerNode = 0;
         //sums all the changes been made to the tree, the larger IG - the better the tree.
-        this.totalIG = 0;
+        //totalIG = 0;
     }
 
 
@@ -35,15 +44,16 @@ public class Tree {
      * @param pixel the condition for the leaf to be splitted by.
      */
     private void creatingTwoLeaves(int pixel) {
-        this.nodeCondition = new Question(pixel);
+        nodeCondition = new Question(pixel);
         List<Picture> picsLeft = new LinkedList<>();
         List<Picture> picsRight = new LinkedList<>();
         splitPicListByQuestion(pixel, picsLeft, picsRight);
-        this.leftTree = new Tree(picsLeft, this);
-        this.rightTree = new Tree(picsRight, this);
+        leftTree = new Tree(picsLeft, this);
+        rightTree = new Tree(picsRight, this);
         leaves.remove(this);
-        leaves.add(this.leftTree);
-        leaves.add(this.rightTree);
+        leaves.add(leftTree);
+        leaves.add(rightTree);
+        totalNodes++;
     }
 
     /**
@@ -66,7 +76,7 @@ public class Tree {
     /**
      * This method calculate the entropy of a node with two leaves
      *
-     * @param nl          The amount of picture that get to the root node
+     * @param nl          The amount of pictures that get to the root node
      * @param leftLabels  The labels of the pictures that goes to the left leaf
      * @param rightLabels The labels of the pictures that goes to the right leaf
      * @return the entropy of the root node
@@ -86,17 +96,16 @@ public class Tree {
      * This method find the best question for a specific leaf, means it only been called by a leaf.
      *
      * @return The best entropy possible for this leaf.
-     * Side-effect: changes the condition-node of the leaf, so if the root chose this leaf to be the best,
+     * Side-effects: changes the condition-node of the leaf, so if the root chose this leaf to be the best,
      * it will know what is the question.
      */
     public double findingBest() {
         if (leftTree == null && rightTree == null) {
             int minEntropyQuest = 0;
             double minEntropy = Integer.MAX_VALUE;
-            List<Integer> usedQuest = this.usedPixels();
             for (int i = 0; i < 784; i++) {
-                if (!usedQuest.isEmpty()) {
-                    for (Integer j : usedQuest) {
+                if (!usedPixels.isEmpty()) {
+                    for (Integer j : usedPixels) {
                         if (j == i)
                             break;
                     }
@@ -105,7 +114,7 @@ public class Tree {
                 List<Picture> picsLeft = new LinkedList<>();
                 List<Picture> picsRight = new LinkedList<>();
                 splitPicListByQuestion(i, picsLeft, picsRight);
-                double nl = Arrays.stream(this.labels).sum();
+                double nl = Arrays.stream(labels).sum();
                 double newEntropy = calculatingEntropy(nl, Utils.countingPics(picsLeft), Utils.countingPics(picsRight));
 
                 if (newEntropy < minEntropy) {
@@ -130,7 +139,8 @@ public class Tree {
         Tree bestLeaf = null;
         int bestQuestion = 0;
         for (Tree leaf : leaves) {
-            double nl = Arrays.stream(leaf.labels).sum();
+            //double nl = Arrays.stream(leaf.labels).sum();
+            double nl = leaf.labelSum;
             double HX = leaf.findingBest();
             double HL = Utils.calculateEntropy(leaf.labels);
             double IG = HL - HX;
@@ -144,9 +154,9 @@ public class Tree {
         }
 
         if (bestLeaf != null) {
-            this.totalIG += bestIG;
+            totalIG += bestIG;
             bestLeaf.creatingTwoLeaves(bestQuestion);
-            this.getSize();
+            getSize();
         }
     }
 
@@ -158,11 +168,11 @@ public class Tree {
         return totalEntropy;
     }
 
-    /**
+    /*    *//**
      * This method go over all the parents of a leaf and check which questions were asked before.
      *
      * @return list of integers of al the pixel that were asked about in the parents nodes.
-     */
+     *//*
     public List<Integer> usedPixels() {
         List<Integer> usedQuest = new LinkedList<>();
         Tree currentTree = this.parent;
@@ -171,7 +181,7 @@ public class Tree {
             currentTree = currentTree.parent;
         }
         return usedQuest;
-    }
+    }*/
 
     /**
      * This method calculate the size of the entire tree by calculating the size of each subtree.
@@ -180,17 +190,18 @@ public class Tree {
      * @return the size of the tree - used for recursion.
      */
     private double getSize() {
-        double leftSize = 0;
+/*        double leftSize = 0;
         double rightSize = 0;
-        if (this.leftTree != null)
-            leftSize = this.leftTree.getSize();
-        if (this.rightTree != null)
-            rightSize = this.rightTree.getSize();
-        if (this.rightTree != null || this.leftTree != null)
-            this.treeSize = 1 + leftSize + rightSize;
+        if (leftTree != null)
+            leftSize = leftTree.getSize();
+        if (rightTree != null)
+            rightSize = rightTree.getSize();
+        if (rightTree != null || leftTree != null)
+            treeSize = 1 + leftSize + rightSize;
         else
-            this.treeSize = 0;
-        return this.treeSize;
+            treeSize = 0;
+        return this.treeSize;*/
+
     }
 
     public String toString() {
@@ -209,21 +220,43 @@ public class Tree {
         return str;
     }
 
-    /** Function that goes over all the leaves and
+    /**
+     * Function that goes over all the leaves and
      * counts all the examples that landed there, who matches
      * the label in the leaf.
+     *
      * @return the percentage of matched examples. i.e how much the tree predicted correctly.
      */
     public double getSuccessRate() {
         double matchedExamples = 0;
         double totalExamples = 0;
         for (Tree leaf : leaves) {
-            for (Picture picture: leaf.picturesSet) {
-                if(picture.label == leaf.label)
+            for (Picture picture : leaf.picturesSet) {
+                if (picture.label == leaf.label)
                     matchedExamples++;
                 totalExamples++;
             }
         }
         return matchedExamples / totalExamples;
     }
+
+    /** Iterates over all the pictures, to set the labels array,
+     * find the max label and sum the array.
+     */
+    private void setLabelsInformation() {
+        labelSum = 0;
+        int maxLabelValue = Integer.MIN_VALUE;
+        for (Picture pic : picturesSet) {
+            labels[pic.label]++;
+            if (labels[pic.label] > maxLabelValue) {
+                maxLabelValue = labels[pic.label];
+                label = pic.label;
+            }
+            labelSum++;
+        }
+    }
 }
+
+
+
+

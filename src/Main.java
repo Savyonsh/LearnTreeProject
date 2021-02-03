@@ -46,13 +46,17 @@ public class Main {
                 Tree.leaves.add(currentTree);
                 do {
                     currentTree.act();
-                } while (currentTree.treeSize < size);
+                    System.out.println("tree size: " + currentTree.innerNode);
+                } while (currentTree.innerNode < size);
                 double currentSuccessRate = currentTree.getSuccessRate();
+                System.out.println("debug: successRate: " + currentSuccessRate);
                 if (currentSuccessRate > bestSuccessRate) {
                     bestSize = size;
                     bestSuccessRate = currentSuccessRate;
                 }
             }
+            System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
+
 
             System.out.println("debug: best size: " + bestSize);
             System.out.println("debug: successRate: " + bestSuccessRate);
@@ -63,7 +67,6 @@ public class Main {
                 predicationTree.act();
             } while (predicationTree.treeSize < bestSize);
 
-            System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
             System.out.println("num: " + trainingSet.size());
             System.out.println("error: " + (100 - Math.round(predicationTree.getSuccessRate() * 100)));
             System.out.println("size: " + bestSize);
