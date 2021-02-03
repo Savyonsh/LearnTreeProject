@@ -36,15 +36,15 @@ public class Main {
             double bestSize = 0;
             double bestEntropy = Integer.MAX_VALUE;
             for (int i = 1; i <= maxPowTwo; i++) {
-                double size =  Math.pow(2, i);
+                double size = Math.pow(2, i);
                 Tree currentTree = new Tree(validationSet);
                 Tree.leaves.add(currentTree);
-                 do{
-                     currentTree.act();
-                 } while (currentTree.getSize() <size);
-               if(currentTree.getEntropy() < bestEntropy){
-                   bestSize = size;
-               }
+                do {
+                    currentTree.act();
+                } while (currentTree.treeSize < size);
+                if (currentTree.getEntropy() < bestEntropy) {
+                    bestSize = size;
+                }
             }
             System.out.println("Best Size is: " + bestSize + "\nwith Entropy: " + bestEntropy);
             bestSizeTree = bestSize;

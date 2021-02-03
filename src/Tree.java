@@ -11,6 +11,8 @@ public class Tree {
     int[] labels;
     List<Picture> picturesSet;
     int label;
+    double treeSize;
+
 
     public Tree(List<Picture> picturesSet) {
         this.leftTree = null;
@@ -19,6 +21,7 @@ public class Tree {
         this.picturesSet = picturesSet;
         this.labels = Utils.countingPics(picturesSet);
         this.label = Utils.getMaxIndex(labels);
+        treeSize = getSize();
     }
 
  /*   public Tree(Question nodeCondition, List<Picture> picturesSet){
@@ -33,32 +36,32 @@ public class Tree {
         this.picturesSet = picturesSet;
     }*/
 
-    public double getEntropy(){
+    public double getEntropy() {
         double nl = Arrays.stream(labels).sum();
-        if(leftTree == null  && rightTree == null)
+        if (leftTree == null && rightTree == null)
             return Utils.calculateEntropy(labels);
 
         double leftTreeEntropy = 0;
         double rightTreeEntropy = 0;
-        if(leftTree != null) {
+        if (leftTree != null) {
             leftTreeEntropy = leftTree.getEntropy();
             double nla = Arrays.stream(leftTree.labels).sum();
-            leftTreeEntropy *= nla/nl;
+            leftTreeEntropy *= nla / nl;
         }
-        if(rightTree != null) {
+        if (rightTree != null) {
             rightTreeEntropy = rightTree.getEntropy();
             double nlb = Arrays.stream(rightTree.labels).sum();
-            rightTreeEntropy *= nlb/nl;
+            rightTreeEntropy *= nlb / nl;
         }
         return leftTreeEntropy + rightTreeEntropy;
     }
 
-    private double checkingForEntropy(int pixel){
+    private double checkingForEntropy(int pixel) {
         this.nodeCondition = new Question(pixel);
         List<Picture> picsLeft = new LinkedList<>();
         List<Picture> picsRight = new LinkedList<>();
-        for (Picture pic: picturesSet) {
-            if(this.nodeCondition.ask(pic.pixels))
+        for (Picture pic : picturesSet) {
+            if (this.nodeCondition.ask(pic.pixels))
                 picsLeft.add(pic);
             else
                 picsRight.add(pic);
@@ -70,20 +73,20 @@ public class Tree {
         return this.getEntropy();
     }
 
-    public double findingBest(){
-        if(leftTree == null && rightTree == null) {
+    public double findingBest() {
+        if (leftTree == null && rightTree == null) {
             int minEntropyQuest = 0;
             double minEntropy = Integer.MAX_VALUE;
             List<Integer> usedQuest = this.usedPixels();
             for (int i = 0; i < 784; i++) {
-                if(!usedQuest.isEmpty()){
+                if (!usedQuest.isEmpty()) {
                     for (Integer j : usedQuest) {
                         if (j == i)
                             break;
                     }
                 }
                 double newEntropy = checkingForEntropy(i);
-                if(newEntropy< minEntropy){
+                if (newEntropy < minEntropy) {
                     minEntropy = newEntropy;
                     minEntropyQuest = i;
                 }
@@ -93,15 +96,15 @@ public class Tree {
         return 0;
     }
 
-    public void act(){
+    public void act() {
         double bestIG = Integer.MIN_VALUE;
         Tree bestLeaf = null;
         int bestQuestion = 0;
-        for (Tree leaf:leaves) {
+        for (Tree leaf : leaves) {
             double nl = Arrays.stream(leaf.labels).sum();
-            double newEntropy = leaf.findingBest();
-            double newIG = nl*getIGValue(leaf);
-            if(newIG> bestIG){
+            leaf.findingBest();
+            double newIG = nl * getIGValue(leaf);
+            if (newIG > bestIG) {
                 bestIG = newIG;
                 bestLeaf = leaf;
                 bestQuestion = leaf.nodeCondition.pixelNum;
@@ -111,13 +114,14 @@ public class Tree {
             leaf.rightTree = null;
         }
 
-        if(bestLeaf != null) {
+        if (bestLeaf != null) {
             bestLeaf.checkingForEntropy(bestQuestion);
             leaves.remove(bestLeaf);
             bestLeaf.leftTree.parent = bestLeaf;
             bestLeaf.rightTree.parent = bestLeaf;
             leaves.add(bestLeaf.leftTree);
             leaves.add(bestLeaf.rightTree);
+            treeSize = getSize();
 
         }
 
@@ -164,25 +168,16 @@ public class Tree {
         return leftTree;*/
     }
 
-    public double getIGValue(Tree leaf){
+    public double getIGValue(Tree leaf) {
         double HL = Utils.calculateEntropy(leaf.labels);
         double GL = leaf.getEntropy();
-        return  HL-GL;
+        return HL - GL;
     }
 
-    private void getSetOfLeaves(Set<Leaf> leaves) {
-        if(this instanceof Leaf) {
-            leaves.add((Leaf) this);
-            return;
-        }
-        if(leftTree != null) leftTree.getSetOfLeaves(leaves);
-        if(rightTree != null) rightTree.getSetOfLeaves(leaves);
-    }
-
-    public List<Integer> usedPixels(){
+    public List<Integer> usedPixels() {
         List<Integer> usedQuest = new LinkedList<>();
         Tree currentTree = this.parent;
-        while(currentTree != null){
+        while (currentTree != null) {
             usedQuest.add(currentTree.nodeCondition.pixelNum);
             currentTree = currentTree.parent;
         }
@@ -209,10 +204,6 @@ public class Tree {
 //        }
 //        return entropy;
 //    }
-
-    private double getNOfLeaf(Leaf leaf) {
-        return Arrays.stream(leaf.labels).sum();
-    }
 
     /*private Tree getLeafWithHighestEntropyValue() {
         if (leftTree == null && rightTree == null) {
@@ -245,30 +236,28 @@ public class Tree {
         }
     }*/
 
-    public double getSize(){
+    private double getSize() {
         double leftSize = 0;
         double rightSize = 0;
-        if(this.leftTree != null)
+        if (this.leftTree != null)
             leftSize = this.leftTree.getSize();
         if (this.rightTree != null)
             rightSize = this.rightTree.getSize();
-        double size = 1+leftSize+rightSize;
-        return size;
+        return 1 + leftSize + rightSize;
     }
 
-    public String toString(){
+    public String toString() {
         String str = "";
         String leftStr = "left: ";
         String rightStr = "right: ";
-        if(this.leftTree == null && this.rightTree == null){
+        if (this.leftTree == null && this.rightTree == null) {
             str = "label: " + this.label;
-        }
-        else{
-            if(this.leftTree != null)
+        } else {
+            if (this.leftTree != null)
                 leftStr += this.leftTree.toString();
-            if(this.rightTree != null)
+            if (this.rightTree != null)
                 rightStr += this.rightTree.toString();
-            str = this.nodeCondition.toString() +"\n"+ leftStr +"\n" + rightStr;
+            str = this.nodeCondition.toString() + "\n" + leftStr + "\n" + rightStr;
         }
         return str;
     }

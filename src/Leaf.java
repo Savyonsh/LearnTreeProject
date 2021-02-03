@@ -9,8 +9,4 @@ public class Leaf extends Tree{
         this.labels = labels;
     }
 
-    @Override
-    public double getSize() {
-        return 1;
-    }
 }
