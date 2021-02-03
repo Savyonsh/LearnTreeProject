@@ -34,19 +34,22 @@ public class Main {
             }
             myReader.close();
             double bestSize = 0;
-            double bestEntropy = Integer.MAX_VALUE;
-            for (int i = 1; i <= maxPowTwo; i++) {
+            double bestIG = Integer.MIN_VALUE;
+            for (int i = 0; i <= maxPowTwo; i++) {
                 double size = Math.pow(2, i);
-                Tree currentTree = new Tree(validationSet);
+                Tree currentTree = new Tree(validationSet, null);
+                Tree.leaves.clear();
                 Tree.leaves.add(currentTree);
                 do {
                     currentTree.act();
                 } while (currentTree.treeSize < size);
-                if (currentTree.getEntropy() < bestEntropy) {
+                double IG = currentTree.totalIG;
+                if (IG > bestIG) {
                     bestSize = size;
+                    bestIG = IG;
                 }
             }
-            System.out.println("Best Size is: " + bestSize + "\nwith Entropy: " + bestEntropy);
+            System.out.println("Best Size is: " + bestSize + "\nwith IG: " + bestIG);
             bestSizeTree = bestSize;
 
             /*

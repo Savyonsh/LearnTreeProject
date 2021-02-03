@@ -12,67 +12,79 @@ public class Tree {
     List<Picture> picturesSet;
     int label;
     double treeSize;
+    double totalIG;
 
 
-    public Tree(List<Picture> picturesSet) {
+    public Tree(List<Picture> picturesSet, Tree parent) {
+        this.parent = parent;
         this.leftTree = null;
         this.rightTree = null;
         this.nodeCondition = null;
         this.picturesSet = picturesSet;
         this.labels = Utils.countingPics(picturesSet);
         this.label = Utils.getMaxIndex(labels);
-        treeSize = getSize();
+        this.getSize();
+        //sums all the changes been made to the tree, the larger IG - the better the tree.
+        this.totalIG = 0;
     }
 
- /*   public Tree(Question nodeCondition, List<Picture> picturesSet){
-        this.nodeCondition = nodeCondition;
-        this.picturesSet = picturesSet;
-    }
 
-    public Tree(Question nodeCondition, Tree leftTree, Tree rightTree, List<Picture> picturesSet){
-        this.nodeCondition = nodeCondition;
-        this.leftTree = leftTree;
-        this.rightTree = rightTree;
-        this.picturesSet = picturesSet;
-    }*/
-
-    public double getEntropy() {
-        double nl = Arrays.stream(labels).sum();
-        if (leftTree == null && rightTree == null)
-            return Utils.calculateEntropy(labels);
-
-        double leftTreeEntropy = 0;
-        double rightTreeEntropy = 0;
-        if (leftTree != null) {
-            leftTreeEntropy = leftTree.getEntropy();
-            double nla = Arrays.stream(leftTree.labels).sum();
-            leftTreeEntropy *= nla / nl;
-        }
-        if (rightTree != null) {
-            rightTreeEntropy = rightTree.getEntropy();
-            double nlb = Arrays.stream(rightTree.labels).sum();
-            rightTreeEntropy *= nlb / nl;
-        }
-        return leftTreeEntropy + rightTreeEntropy;
-    }
-
-    private double checkingForEntropy(int pixel) {
+    /**
+     * This method is called by a leaf and it splits it to two different leaves and it enlarged the whole tree.
+     * @param pixel the condition for the leaf to be splitted by.
+     */
+    private void creatingTwoLeaves(int pixel) {
         this.nodeCondition = new Question(pixel);
         List<Picture> picsLeft = new LinkedList<>();
         List<Picture> picsRight = new LinkedList<>();
-        for (Picture pic : picturesSet) {
-            if (this.nodeCondition.ask(pic.pixels))
-                picsLeft.add(pic);
-            else
-                picsRight.add(pic);
-        }
-        this.leftTree = new Tree(picsLeft);
-        this.rightTree = new Tree(picsRight);
-        this.leftTree = new Tree(picsLeft);
-        this.rightTree = new Tree(picsRight);
-        return this.getEntropy();
+        splitPicListByQuestion(pixel, picsLeft, picsRight);
+        this.leftTree = new Tree(picsLeft, this);
+        this.rightTree = new Tree(picsRight, this);
+        leaves.remove(this);
+        leaves.add(this.leftTree);
+        leaves.add(this.rightTree);
     }
 
+    /**
+     * This method split the pictureSet of the node to two different pictureSets by a condition
+     * @param pixel the condition
+     * @param left an empty list to be filled with picture from the pictureSet that the condition is applied to them
+     * @param right an empty list to be filled with picture from the pictureSet that the condition isn't applied to them
+     */
+    private void splitPicListByQuestion(int pixel, List<Picture> left, List<Picture> right){
+        Question quest = new Question(pixel);
+        for (Picture pic : picturesSet) {
+            if (quest.ask(pic.pixels))
+                left.add(pic);
+            else
+                right.add(pic);
+        }
+    }
+
+    /**
+     * This method calculate the entropy of a node with two leaves
+     * @param nl The amount of picture that get to the root node
+     * @param leftLabels The labels of the pictures that goes to the left leaf
+     * @param rightLabels The labels of the pictures that goes to the right leaf
+     * @return the entropy of the root node
+     */
+    private double calculatingEntropy(double nl, int[] leftLabels, int[] rightLabels){
+        double entropy = 0;
+        double leftEntropy = Utils.calculateEntropy(leftLabels);
+        double nla = Arrays.stream(leftLabels).sum();
+        double rightEntropy = Utils.calculateEntropy(rightLabels);
+        double nlb = Arrays.stream(rightLabels).sum();
+        entropy += leftEntropy*nla/nl;
+        entropy += rightEntropy*nlb/nl;
+        return entropy;
+    }
+
+    /**
+     * This method find the best question for a specific leaf, means it only been called by a leaf.
+     * @return The best entropy possible for this leaf.
+     * Side-effect: changes the condition-node of the leaf, so if the root chose this leaf to be the best,
+     * it will know what is the question.
+     */
     public double findingBest() {
         if (leftTree == null && rightTree == null) {
             int minEntropyQuest = 0;
@@ -85,95 +97,59 @@ public class Tree {
                             break;
                     }
                 }
-                double newEntropy = checkingForEntropy(i);
+
+                List<Picture> picsLeft = new LinkedList<>();
+                List<Picture> picsRight = new LinkedList<>();
+                splitPicListByQuestion(i, picsLeft, picsRight);
+                double nl =  Arrays.stream(this.labels).sum();
+                double newEntropy = calculatingEntropy(nl, Utils.countingPics(picsLeft), Utils.countingPics(picsRight));
+
                 if (newEntropy < minEntropy) {
                     minEntropy = newEntropy;
                     minEntropyQuest = i;
                 }
             }
-            return checkingForEntropy(minEntropyQuest);
+            this.nodeCondition = new Question(minEntropyQuest);
+            return minEntropy;
         }
         return 0;
     }
 
+    /**
+     * This method happens only in the root.
+     * Here the root try to find the best leaf to split into two new leaves.
+     * It been called by the main class, it doesn't get any argument and it doesn't return any value,
+     * all it does is side-effect to the tree.
+     */
     public void act() {
         double bestIG = Integer.MIN_VALUE;
         Tree bestLeaf = null;
         int bestQuestion = 0;
         for (Tree leaf : leaves) {
             double nl = Arrays.stream(leaf.labels).sum();
-            leaf.findingBest();
-            double newIG = nl * getIGValue(leaf);
+            double HX = leaf.findingBest();
+            double HL = Utils.calculateEntropy(leaf.labels);
+            double IG = HL - HX;
+            double newIG = nl * IG;
+
             if (newIG > bestIG) {
                 bestIG = newIG;
                 bestLeaf = leaf;
                 bestQuestion = leaf.nodeCondition.pixelNum;
             }
-            leaf.nodeCondition = null;
-            leaf.leftTree = null;
-            leaf.rightTree = null;
-        }
+    }
 
         if (bestLeaf != null) {
-            bestLeaf.checkingForEntropy(bestQuestion);
-            leaves.remove(bestLeaf);
-            bestLeaf.leftTree.parent = bestLeaf;
-            bestLeaf.rightTree.parent = bestLeaf;
-            leaves.add(bestLeaf.leftTree);
-            leaves.add(bestLeaf.rightTree);
-            treeSize = getSize();
-
+            this.totalIG += bestIG;
+            bestLeaf.creatingTwoLeaves(bestQuestion);
+            this.getSize();
         }
-
-
-
-
-
-        /*Set<Leaf> leaves = new HashSet<>();
-        getSetOfLeaves(leaves);
-        Question bestQuestion = null;
-        Leaf bestLeaf = null;
-
-        for(Leaf leaf : leaves) {
-            double maxNLIGLValue = Double.MIN_VALUE;
-            for(Question question : QuestionSet.questionSet) {
-                double currentNLIGLValue = IGValue(leaf, question);
-                if (currentNLIGLValue > maxNLIGLValue) {
-                    currentNLIGLValue = maxNLIGLValue;
-                    bestQuestion = question;
-                    bestLeaf = leaf;
-                }
-            }
-        }
-
-        assert bestLeaf != null;
-        int[] labels = Arrays.copyOf(bestLeaf.labels, bestLeaf.labels.length);
-        labels[bestQuestion.label]++;
-        Leaf lr = new Leaf(labels);
-        Leaf ll = new Leaf(bestLeaf.labels);
-        Tree newNode = new Tree(bestLeaf.parent, bestQuestion, ll, lr);
-        if(bestLeaf.parent.leftTree == bestLeaf) bestLeaf.parent.leftTree = newNode;
-        else bestLeaf.parent.rightTree = newNode;*/
-/*        // Choose a leaf
-
-        if(question.ask(pic)){
-            if(rightTree == null){
-                this.rightTree = new Tree(num, new Question(12), nArray);
-            }
-            return rightTree;
-        }
-        if(leftTree == null){
-            this.leftTree = new Tree(num, new Question(12), nArray);
-        }
-        return leftTree;*/
     }
 
-    public double getIGValue(Tree leaf) {
-        double HL = Utils.calculateEntropy(leaf.labels);
-        double GL = leaf.getEntropy();
-        return HL - GL;
-    }
-
+    /**
+     * This method go over all the parents of a leaf and check which questions were asked before.
+     * @return list of integers of al the pixel that were asked about in the parents nodes.
+     */
     public List<Integer> usedPixels() {
         List<Integer> usedQuest = new LinkedList<>();
         Tree currentTree = this.parent;
@@ -184,58 +160,11 @@ public class Tree {
         return usedQuest;
     }
 
-//    private double IGValue(Leaf leaf, Question question) {
-//        int[] labels = Arrays.copyOf(leaf.labels, leaf.labels.length);
-//        labels[question.label]++;
-//        Leaf lr = new Leaf(labels);
-//        Leaf ll = new Leaf(leaf.labels);
-//        double lrValue = getHValue(lr);
-//        double llValue = getHValue(ll);
-//        double HX = ((getNOfLeaf(lr) * lrValue) + getNOfLeaf(ll) * llValue) / getNOfLeaf(leaf);
-//        return getHValue(leaf) - HX;
-//    }
-
-//    private double getHValue(Leaf leaf) {
-//        double entropy = 0;
-//        double nl = getNOfLeaf(leaf);
-//        for(int nli : leaf.labels) {
-//            double log = Math.log( nli / nl);
-//            entropy += (nli / nl) * log;
-//        }
-//        return entropy;
-//    }
-
-    /*private Tree getLeafWithHighestEntropyValue() {
-        if (leftTree == null && rightTree == null) {
-            return this;
-        }
-        double bestValue = Double.MIN_VALUE;
-        double currentValue;
-        Tree returnedLeaf = null;
-
-        if (leftTree != null) {
-            Tree leftLeaf = leftTree.getLeafWithHighestEntropyValue();
-            if ((currentValue = leftLeaf.entropy) > bestValue) {
-                bestValue = currentValue;
-                returnedLeaf = leftLeaf;
-            }
-        } if(rightTree != null) {
-            Tree rightLeaf = rightTree.getLeafWithHighestEntropyValue();
-            if (rightLeaf.entropy > bestValue) {
-                returnedLeaf = rightLeaf;
-            }
-        }
-        return returnedLeaf;
-    }
-
-    private void increaseLabelCount(Tree tree, int label) {
-        if(tree == leftTree) {
-            leftTree.labels[label]++;
-        } else if(tree == rightTree) {
-            rightTree.labels[label]++;
-        }
-    }*/
-
+    /**
+     * This method calculate the size of the entire tree by calculating the size of each subtree.
+     * The size is the amount of internal nodes, as described in the assigment.
+     * @return the size of the tree - used for recursion.
+     */
     private double getSize() {
         double leftSize = 0;
         double rightSize = 0;
@@ -243,7 +172,11 @@ public class Tree {
             leftSize = this.leftTree.getSize();
         if (this.rightTree != null)
             rightSize = this.rightTree.getSize();
-        return 1 + leftSize + rightSize;
+        if(this.rightTree != null || this.leftTree != null)
+            this.treeSize = 1 + leftSize + rightSize;
+        else
+            this.treeSize = 0;
+        return this.treeSize;
     }
 
     public String toString() {

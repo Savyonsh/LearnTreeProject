@@ -59,8 +59,10 @@ public class Utils {
         double entropy =0;
         double nl = Arrays.stream(arr).sum();
         for(int nli : arr) {
-            double log = Math.log( nli / nl);
-            entropy += (nli / nl) * log;
+            if(nli != 0) {
+                double log = Math.log(nl/ nli);
+                entropy += (nli / nl) * log;
+            }
         }
         return entropy;
     }
