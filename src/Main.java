@@ -42,12 +42,10 @@ public class Main {
             for (int i = 0; i <= maxPowTwo; i++) {
                 double size = Math.pow(2, i);
                 Tree currentTree = new Tree(validationSet, null);
-                Tree.leaves.clear();
-                Tree.leaves.add(currentTree);
                 do {
                     currentTree.act();
-                    System.out.println("tree size: " + currentTree.innerNode);
-                } while (currentTree.innerNode < size);
+                    System.out.println("tree size: " + Tree.totalNodes);
+                } while (Tree.totalNodes < size);
                 double currentSuccessRate = currentTree.getSuccessRate();
                 System.out.println("debug: successRate: " + currentSuccessRate);
                 if (currentSuccessRate > bestSuccessRate) {

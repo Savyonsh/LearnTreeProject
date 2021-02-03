@@ -5,6 +5,7 @@ public class Tree {
     // Tree
     Tree parent;
     static List<Tree> leaves = new LinkedList<>();
+    static double totalNodes = 0;
     Tree leftTree;
     Tree rightTree;
     Question nodeCondition;
@@ -25,16 +26,16 @@ public class Tree {
         usedPixels = new LinkedList<>();
         labels = new int[10];
         setLabelsInformation();
-/*        this.labels =  Utils.countingPics(picturesSet);
-        this.label = Utils.getMaxIndex(labels);*/
-        if (parent != null)
+        if (parent != null) {
+            usedPixels.addAll(parent.usedPixels);
             usedPixels.add(parent.nodeCondition.pixelNum);
-        //getSize();
-         //= 1;
-
-        innerNode = 0;
-        //sums all the changes been made to the tree, the larger IG - the better the tree.
-        //totalIG = 0;
+        }
+        //this is the case this is the root
+        else{
+            leaves.clear();
+            totalNodes = 0;
+            leaves.add(this);
+        }
     }
 
 
@@ -114,7 +115,7 @@ public class Tree {
                 List<Picture> picsLeft = new LinkedList<>();
                 List<Picture> picsRight = new LinkedList<>();
                 splitPicListByQuestion(i, picsLeft, picsRight);
-                double nl = Arrays.stream(labels).sum();
+                double nl = this.labelSum;
                 double newEntropy = calculatingEntropy(nl, Utils.countingPics(picsLeft), Utils.countingPics(picsRight));
 
                 if (newEntropy < minEntropy) {
@@ -139,7 +140,6 @@ public class Tree {
         Tree bestLeaf = null;
         int bestQuestion = 0;
         for (Tree leaf : leaves) {
-            //double nl = Arrays.stream(leaf.labels).sum();
             double nl = leaf.labelSum;
             double HX = leaf.findingBest();
             double HL = Utils.calculateEntropy(leaf.labels);
@@ -156,7 +156,6 @@ public class Tree {
         if (bestLeaf != null) {
             totalIG += bestIG;
             bestLeaf.creatingTwoLeaves(bestQuestion);
-            getSize();
         }
     }
 
@@ -166,42 +165,6 @@ public class Tree {
             totalEntropy += Utils.calculateEntropy(leaf.labels);
         }
         return totalEntropy;
-    }
-
-    /*    *//**
-     * This method go over all the parents of a leaf and check which questions were asked before.
-     *
-     * @return list of integers of al the pixel that were asked about in the parents nodes.
-     *//*
-    public List<Integer> usedPixels() {
-        List<Integer> usedQuest = new LinkedList<>();
-        Tree currentTree = this.parent;
-        while (currentTree != null) {
-            usedQuest.add(currentTree.nodeCondition.pixelNum);
-            currentTree = currentTree.parent;
-        }
-        return usedQuest;
-    }*/
-
-    /**
-     * This method calculate the size of the entire tree by calculating the size of each subtree.
-     * The size is the amount of internal nodes, as described in the assigment.
-     *
-     * @return the size of the tree - used for recursion.
-     */
-    private double getSize() {
-/*        double leftSize = 0;
-        double rightSize = 0;
-        if (leftTree != null)
-            leftSize = leftTree.getSize();
-        if (rightTree != null)
-            rightSize = rightTree.getSize();
-        if (rightTree != null || leftTree != null)
-            treeSize = 1 + leftSize + rightSize;
-        else
-            treeSize = 0;
-        return this.treeSize;*/
-
     }
 
     public String toString() {
@@ -244,7 +207,7 @@ public class Tree {
      * find the max label and sum the array.
      */
     private void setLabelsInformation() {
-        labelSum = 0;
+        this.labelSum = 0;
         int maxLabelValue = Integer.MIN_VALUE;
         for (Picture pic : picturesSet) {
             labels[pic.label]++;
@@ -252,7 +215,7 @@ public class Tree {
                 maxLabelValue = labels[pic.label];
                 label = pic.label;
             }
-            labelSum++;
+            this.labelSum++;
         }
     }
 }
