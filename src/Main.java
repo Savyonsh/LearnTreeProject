@@ -15,7 +15,9 @@ public class Main {
     private static List<Picture> trainingSet;
 
     public static void main(String[] args) {
-        Instant start = Instant.now();
+        Program program = new Program();
+        program.run(args[3],Double.parseDouble(args[1]), Integer.parseInt(args[2]));
+/*        Instant start = Instant.now();
         version = Integer.parseInt(args[0]);
         validPercent = Double.parseDouble(args[1]);
         //validPercent = validPercent / 100;
@@ -44,7 +46,6 @@ public class Main {
                 Tree currentTree = new Tree(validationSet, null);
                 do {
                     currentTree.act();
-                    System.out.println("tree size: " + Tree.totalNodes);
                 } while (Tree.totalNodes < size);
                 double currentSuccessRate = currentTree.getSuccessRate();
                 System.out.println("debug: successRate: " + currentSuccessRate);
@@ -54,29 +55,26 @@ public class Main {
                 }
             }
             System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
-
-
             System.out.println("debug: best size: " + bestSize);
             System.out.println("debug: successRate: " + bestSuccessRate);
 
-            /*Tree predicationTree = new Tree(trainingSet, null);
-            Tree.leaves.add(predicationTree);
+            Tree predicationTree = new Tree(trainingSet, null);
             do {
                 predicationTree.act();
-            } while (predicationTree.treeSize < bestSize);
+            } while (predicationTree.totalNodes < bestSize);
 
             System.out.println("num: " + trainingSet.size());
             System.out.println("error: " + (100 - Math.round(predicationTree.getSuccessRate() * 100)));
-            System.out.println("size: " + bestSize);
+            System.out.println("size: " + bestSize);*/
 
-*/
 
-        } catch (FileNotFoundException e) {
+
+        /*} catch (FileNotFoundException e) {
             System.out.println("There is a problem with the training set.");
             e.printStackTrace();
         } catch (IOException e) {
             System.out.println("There is a problem with I/O.");
             e.printStackTrace();
-        }
+        }*/
     }
 }

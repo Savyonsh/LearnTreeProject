@@ -3,7 +3,8 @@ import java.util.List;
 
 public class Utils {
 
-    public static final int VEC_SIZE = 785;
+    public static final int VEC_SIZE = 784;
+    //public static int[][][] calculatedEntropyValues = new int[10][VEC_SIZE][VEC_SIZE];
 
     static int mostFrequent(int[] arr) {
         return mostFrequent(arr, arr.length);
@@ -43,15 +44,6 @@ public class Utils {
         return res;
     }
 
-    static int[] countingPics(List<Picture> picSet){
-        int[] arr = new int[10];
-        for (Picture pic: picSet) {
-            arr[pic.label]++;
-        }
-        return arr;
-    }
-
-
     static int getLabelsData(List<Picture> picSet, int[] output, int[] oFrequentLabel){
         int sum = 0;
         int maxLabelValue = Integer.MIN_VALUE;
@@ -76,9 +68,8 @@ public class Utils {
         return max;
     }
 
-    static double calculateEntropy(int[] arr) {
+    static double calculateEntropy(int[] arr, double nl) {
         double entropy = 0;
-        double nl = Arrays.stream(arr).sum();
         for (int nli : arr) {
             if (nli != 0) {
                 double log = Math.log(nl / nli);

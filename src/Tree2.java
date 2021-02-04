@@ -1,65 +1,61 @@
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+import java.util.BitSet;
+import java.util.LinkedList;
+import java.util.List;
 
+public class Tree2 {
+    Tree2 parent;
+    Tree2 leftTree;
+    Tree2 rightTree;
+    Tree2 root;
 
-public class Tree {
-    // Tree
-    Tree parent;
-    Tree leftTree;
-    Tree rightTree;
-    static List<Tree> leaves = new LinkedList<>();
-    static double totalNodes = 0;
-    //Question nodeCondition;
+    // Saved only at root
+    List<Tree2> leaves;
+    int totalNodes;
+
+    // Inner nodes
     int nodePixel;
+    int label;
+
+    // Leaves
     int[] labels;
     int labelSum;
-    // Try to change to list of arrays
-    List<Picture> picturesSet;
-    int label;
-    double totalIG;
     BitSet usedPixels;
-    //int checkingAmount = 0;
+    List<Picture> picturesSet;
+    double totalIG;
 
-    public Tree(List<Picture> picturesSet, Tree parent) {
+    public Tree2(List<Picture> picturesSet, Tree2 parent, Tree2 root) {
         this.parent = parent;
-        leftTree = null;
-        rightTree = null;
-        nodePixel = -1;
-        //nodeCondition = null;
+        this.root = root;
         this.picturesSet = picturesSet;
+        usedPixels = new BitSet(Utils.VEC_SIZE);
         labels = new int[10];
         setLabelsInformation();
+
         if (parent != null) {
             usedPixels.or(parent.usedPixels);
             usedPixels.flip(parent.nodePixel); // Turn that bit on.
-        }
-        //this is the case this is the root
-        else {
-            leaves.clear();
+        } else { // This is root
+            this.root = this;
+            leaves = new LinkedList<>();
             leaves.add(this);
-            totalNodes = 0;
         }
     }
-
-
     /**
      * This method is called by a leaf and it splits it to two different leaves and it enlarged the whole tree.
      *
      * @param pixel the condition for the leaf to be splitted by.
      */
     private void creatingTwoLeaves(int pixel) {
-        //nodeCondition = new Question(pixel);
         nodePixel = pixel;
-        totalNodes++;
         List<Picture> picsLeft = new LinkedList<>();
         List<Picture> picsRight = new LinkedList<>();
         splitPicListByQuestion(pixel, picsLeft, picsRight);
-        leftTree = new Tree(picsLeft, this);
-        rightTree = new Tree(picsRight, this);
-        leaves.remove(this);
-        leaves.add(leftTree);
-        leaves.add(rightTree);
+        leftTree = new Tree2(picsLeft, this, root);
+        rightTree = new Tree2(picsRight, this, root);
+        root.leaves.remove(this);
+        root.leaves.add(leftTree);
+        root.leaves.add(rightTree);
+        root.totalNodes++;
     }
 
     /**
@@ -70,7 +66,6 @@ public class Tree {
      * @param right an empty list to be filled with picture from the pictureSet that the condition isn't applied to them
      */
     private void splitPicListByQuestion(int pixel, List<Picture> left, List<Picture> right) {
-        //Question quest = new Question(pixel);
         for (Picture pic : picturesSet) {
             if (Question.ask(pic.pixels, pixel))
                 left.add(pic);
@@ -79,22 +74,6 @@ public class Tree {
         }
     }
 
-    /**
-     * This method calculate the entropy of a node with two leaves
-     *
-     * @param nl          The amount of pictures that get to the root node
-     * @param leftLabels  The labels of the pictures that goes to the left leaf
-     * @param rightLabels The labels of the pictures that goes to the right leaf
-     * @return the entropy of the root node
-     */
-    private double calculatingEntropy(double nl, int[] leftLabels, int leftNl, int[] rightLabels, int rightNl) {
-        double entropy = 0;
-        double leftEntropy = Utils.calculateEntropy(leftLabels, leftNl);
-        double rightEntropy = Utils.calculateEntropy(rightLabels, rightNl);
-        entropy += leftEntropy * leftNl / nl;
-        entropy += rightEntropy * rightNl / nl;
-        return entropy;
-    }
 
     /**
      * This method find the best question for a specific leaf, means it only been called by a leaf.
@@ -108,24 +87,20 @@ public class Tree {
             int minEntropyQuest = 0;
             double minEntropy = Integer.MAX_VALUE;
 
-            for (int i = 0; i < 784; i++) {
+            for (int i = 0; i < Utils.VEC_SIZE; i++) {
+                // Check if the bit on index i is 1 - i.e on, and
+                // already been used by parent.
                 if (usedPixels.get(i)) continue;
 
-                /*int[] leftLabels = new int[10];
-                int[] rightLabels = new int[10];
-                List<Picture> picsLeft = new LinkedList<>();
-                List<Picture> picsRight = new LinkedList<>();
-                splitPicListByQuestion(i, picsLeft, picsRight);
-                int leftNl = countingPicsAndReturnSum(picsLeft, leftLabels);
-                int rightNl = countingPicsAndReturnSum(picsRight, rightLabels);
-                double newEntropy = calculatingEntropy(labelSum, leftLabels, leftNl, rightLabels, rightNl);*/
+                // One function that "splits" the picture,
+                // While calculating the sums of the two arrays (left and right)
+                // And calculating the total entropy
                 double newEntropy = getNewEntropy(i);
                 if (newEntropy < minEntropy) {
                     minEntropy = newEntropy;
                     minEntropyQuest = i;
                 }
             }
-            //this.nodeCondition = new Question(minEntropyQuest);
             nodePixel = minEntropyQuest;
             return minEntropy;
         }
@@ -140,9 +115,9 @@ public class Tree {
      */
     public void act() {
         double bestIG = Integer.MIN_VALUE;
-        Tree bestLeaf = null;
+        Tree2 bestLeaf = null;
         int bestQuestion = 0;
-        for (Tree leaf : leaves) {
+        for (Tree2 leaf : root.leaves) {
             double nl = leaf.labelSum;
             double HX = leaf.findingBest();
             double HL = Utils.calculateEntropy(leaf.labels, nl);
@@ -152,7 +127,6 @@ public class Tree {
             if (newIG > bestIG) {
                 bestIG = newIG;
                 bestLeaf = leaf;
-                //bestQuestion = leaf.nodeCondition.pixelNum;
                 bestQuestion = leaf.nodePixel;
             }
         }
@@ -161,14 +135,6 @@ public class Tree {
             totalIG += bestIG;
             bestLeaf.creatingTwoLeaves(bestQuestion);
         }
-    }
-
-    public double getTotalEntropy() {
-        double totalEntropy = 0;
-        for (Tree leaf : leaves) {
-            totalEntropy += Utils.calculateEntropy(leaf.labels, labelSum);
-        }
-        return totalEntropy;
     }
 
 /*
@@ -199,7 +165,7 @@ public class Tree {
     public double getSuccessRate() {
         double matchedExamples = 0;
         double totalExamples = 0;
-        for (Tree leaf : leaves) {
+        for (Tree2 leaf : root.leaves) {
             for (Picture picture : leaf.picturesSet) {
                 if (picture.label == leaf.label)
                     matchedExamples++;
@@ -226,17 +192,15 @@ public class Tree {
         }
     }
 
-
-    static int countingPicsAndReturnSum(List<Picture> picSet, int[] output) {
-        int sum = 0;
-        for (Picture pic : picSet) {
-            output[pic.label]++;
-            sum += output[pic.label];
-        }
-        return sum;
-    }
-
-
+    /**
+     * Function that calculates total entropy for a question in one
+     * It iterates over the picture set, splits all the pictures according
+     * to the pixel, counting the left labels and right, with their sum,
+     * and then calculate their individual entropy to get the total entropy for
+     * this question.
+     * @param pixel pixel number of the question
+     * @return combined entropy
+     */
     private double getNewEntropy(int pixel) {
         int[] rightLabels = new int[10];
         int[] leftLabels = new int[10];
@@ -246,10 +210,10 @@ public class Tree {
         for (Picture pic : picturesSet) {
             if (Question.ask(pic.pixels, pixel)) {
                 leftLabels[pic.label]++;
-                leftNl += leftLabels[pic.label];
+                leftNl++;
             } else {
                 rightLabels[pic.label]++;
-                rightNl += rightLabels[pic.label];
+                rightNl++;
             }
         }
         double leftEntropy = Utils.calculateEntropy(leftLabels, leftNl);
@@ -259,7 +223,3 @@ public class Tree {
         return entropy;
     }
 }
-
-
-
-
