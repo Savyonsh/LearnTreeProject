@@ -41,6 +41,7 @@ public class Main {
             myReader.close();
             double bestSize = 0;
             double bestSuccessRate = Double.MIN_VALUE;
+            Tree bestTree = null;
             for (int i = 0; i <= maxPowTwo; i++) {
                 double size = Math.pow(2, i);
                 Tree currentTree = new Tree(validationSet, null);
@@ -52,11 +53,13 @@ public class Main {
                 if (currentSuccessRate > bestSuccessRate) {
                     bestSize = size;
                     bestSuccessRate = currentSuccessRate;
+                    bestTree = currentTree;
                 }
             }
             System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
             System.out.println("debug: best size: " + bestSize);
             System.out.println("debug: successRate: " + bestSuccessRate);
+            System.out.println(bestTree);
 
             Tree predicationTree = new Tree(trainingSet, null);
             do {

@@ -1,4 +1,3 @@
-import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -33,7 +32,7 @@ public class Program {
             double bestSuccessRate = Double.MIN_VALUE;
             for (int i = 0; i <= maxPowTwo; i++) {
                 double size = Math.pow(2, i);
-                Tree2 currentTree = new Tree2(validationSet, null, null);
+                Tree currentTree = new Tree(validationSet, null, null);
                 do {
                     currentTree.act();
                 } while (currentTree.root.totalNodes < size);
@@ -44,11 +43,12 @@ public class Program {
                     bestSuccessRate = currentSuccessRate;
                 }
             }
+
 /*            System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
             System.out.println("debug: best size: " + bestSize);
             System.out.println("debug: successRate: " + bestSuccessRate);*/
 
-            Tree2 predicationTree = new Tree2(trainingSet, null, null);
+            Tree predicationTree = new Tree(trainingSet, null, null);
             do {
                 predicationTree.act();
             } while (predicationTree.root.totalNodes < bestSize);
