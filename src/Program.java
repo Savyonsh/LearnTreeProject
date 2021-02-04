@@ -37,7 +37,7 @@ public class Program {
         double bestSuccessRate = Double.MIN_VALUE;
         for (int i = 0; i <= maxPowTwo; i++) {
             double size = Math.pow(2, i);
-            Tree currentTree = new Tree(validationSet, null, null, (int)size);
+            Tree currentTree = new Tree(validationSet, null, null, (int) size);
             do {
                 currentTree.act();
             } while (currentTree.root.totalNodes < size);
@@ -49,8 +49,8 @@ public class Program {
             }
         }
         System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
-        System.out.println("debug: best size: " + bestSize);
-        System.out.println("debug: successRate: " + bestSuccessRate);
+        System.out.println("debug: best size: " + (int) bestSize);
+        System.out.printf("debug: successRate: %.3f\n", bestSuccessRate);
         return (int) bestSize;
     }
 
@@ -65,4 +65,6 @@ public class Program {
         System.out.println("error: " + (100 - Math.round(predicationTree.getSuccessRate() * 100)));
         System.out.println("size: " + treeSize);
     }
+
+
 }

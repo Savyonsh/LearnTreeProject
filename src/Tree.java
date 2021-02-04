@@ -41,7 +41,7 @@ public class Tree {
             leaves[leavesIndex] = this;
             leavesIndex++;
             this.totalNodes = 0;
-            treeEssentials = new TreeEssentials(picturesSet.size());
+            treeEssentials = new TreeEssentials(picturesSet);
         }
     }
 
@@ -115,19 +115,29 @@ public class Tree {
                 // already been used by parent.
                 if (usedPixels.get(i)) continue;
 
-                // One function that "splits" the picture,
-                // While calculating the sums of the two arrays (left and right)
-                // And calculating the total entropy
-                double newEntropy;
 
-                if(root.treeEssentials.pictureSetPointers[picturesSet.size()] != null &&
-                    root.treeEssentials.pictureSetPointers[picturesSet.size()] == picturesSet &&
-                root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] != Double.NEGATIVE_INFINITY) {
-                    newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i];
-                } else {
+                double newEntropy = -1;
+
+                if(root.treeEssentials.pictureSetPointers[picturesSet.size()] == picturesSet) {
+                    // Going to be all left
+                    if(root.treeEssentials.vectorTypes[i] == 1 &&
+                            root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex] != Double.NEGATIVE_INFINITY)
+                    newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex];
+                    // Going to be all right
+                    else if(root.treeEssentials.vectorTypes[i] == 2 &&
+                            root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex] != Double.NEGATIVE_INFINITY)
+                        newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex];
+                    else if (root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] != Double.NEGATIVE_INFINITY)
+                        newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i];
+                }
+                if(newEntropy == -1) {
                     newEntropy = getNewEntropy(i);
                     root.treeEssentials.pictureSetPointers[picturesSet.size()] = picturesSet;
                     root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] = newEntropy;
+                    if (root.treeEssentials.vectorTypes[i] == 1)
+                        root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex] = newEntropy;
+                    else if (root.treeEssentials.vectorTypes[i] == 2)
+                        root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex] = newEntropy;
                 }
                 if (newEntropy < minEntropy) {
                     minEntropy = newEntropy;
