@@ -7,7 +7,8 @@ public class Tree {
     Tree root;
 
     // Saved only at root
-    List<Tree> leaves;
+    Tree[] leaves;
+    int leavesIndex;
     int totalNodes;
     TreeEssentials treeEssentials;
 
@@ -21,7 +22,7 @@ public class Tree {
     BitSet usedPixels;
     List<Picture> picturesSet;
 
-    public Tree(List<Picture> picturesSet, Tree parent, Tree root) {
+    public Tree(List<Picture> picturesSet, Tree parent, Tree root, int futureSize) {
         this.parent = parent;
         this.root = root;
         this.picturesSet = picturesSet;
@@ -35,8 +36,10 @@ public class Tree {
 
         } else { // This is root
             this.root = this;
-            leaves = new LinkedList<>();
-            leaves.add(this);
+            leaves = new Tree[futureSize+1];
+            leavesIndex = 0;
+            leaves[leavesIndex] = this;
+            leavesIndex++;
             this.totalNodes = 0;
             treeEssentials = new TreeEssentials(picturesSet.size());
         }
@@ -65,16 +68,16 @@ public class Tree {
      *
      * @param pixel the condition for the leaf to be splitted by.
      */
-    private void creatingTwoLeaves(int pixel) {
+    private void creatingTwoLeaves(int pixel, int leafIndex) {
         nodePixel = pixel;
         List<Picture> picsLeft = new LinkedList<>();
         List<Picture> picsRight = new LinkedList<>();
         splitPicListByQuestion(pixel, picsLeft, picsRight);
-        leftTree = new Tree(picsLeft, this, this.root);
-        rightTree = new Tree(picsRight, this, this.root);
-        root.leaves.remove(this);
-        root.leaves.add(leftTree);
-        root.leaves.add(rightTree);
+        this.leftTree = new Tree(picsLeft, this, this.root, 0);
+        this.rightTree = new Tree(picsRight, this, this.root, 0);
+        root.leaves[leafIndex] = this.leftTree;
+        root.leaves[root.leavesIndex] = this.rightTree;
+        root.leavesIndex++;
         root.totalNodes++;
     }
 
@@ -146,8 +149,11 @@ public class Tree {
     public void act() {
         double bestIG = Integer.MIN_VALUE;
         Tree bestLeaf = null;
+        int bestLeafIndex = 0;
         int bestQuestion = 0;
-        for (Tree leaf : this.leaves) {
+
+        for (int j = 0; j < this.leavesIndex; j++) {
+            Tree leaf = this.leaves[j];
             double nl = leaf.labelSum;
             double HX = leaf.findingBest();
             double HL = Utils.calculateEntropy(leaf.labels, nl);
@@ -157,12 +163,27 @@ public class Tree {
             if (newIG > bestIG) {
                 bestIG = newIG;
                 bestLeaf = leaf;
+                bestLeafIndex = j;
                 bestQuestion = leaf.nodePixel;
             }
         }
 
+//        for (Tree leaf : this.leaves) {
+//            double nl = leaf.labelSum;
+//            double HX = leaf.findingBest();
+//            double HL = Utils.calculateEntropy(leaf.labels, nl);
+//            double IG = HL - HX;
+//            double newIG = nl * IG;
+//
+//            if (newIG > bestIG) {
+//                bestIG = newIG;
+//                bestLeaf = leaf;
+//                bestQuestion = leaf.nodePixel;
+//            }
+//        }
+
         if (bestLeaf != null)
-            bestLeaf.creatingTwoLeaves(bestQuestion);
+            bestLeaf.creatingTwoLeaves(bestQuestion, bestLeafIndex);
 
     }
 

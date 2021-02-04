@@ -37,7 +37,7 @@ public class Program {
         double bestSuccessRate = Double.MIN_VALUE;
         for (int i = 0; i <= maxPowTwo; i++) {
             double size = Math.pow(2, i);
-            Tree currentTree = new Tree(validationSet, null, null);
+            Tree currentTree = new Tree(validationSet, null, null, (int)size);
             do {
                 currentTree.act();
             } while (currentTree.root.totalNodes < size);
@@ -55,7 +55,7 @@ public class Program {
     }
 
     private void runTreeOnTrainingSet(List<Picture> trainingSet, int treeSize) {
-        Tree predicationTree = new Tree(trainingSet, null, null);
+        Tree predicationTree = new Tree(trainingSet, null, null, treeSize);
         do {
             predicationTree.act();
         } while (predicationTree.root.totalNodes < treeSize);
