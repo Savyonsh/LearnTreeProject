@@ -9,6 +9,7 @@ public class Tree {
     // Saved only at root
     List<Tree> leaves;
     int totalNodes;
+    TreeEssentials treeEssentials;
 
     // Inner nodes
     int nodePixel;
@@ -31,11 +32,13 @@ public class Tree {
         if (parent != null) {
             usedPixels.or(parent.usedPixels);
             usedPixels.flip(parent.nodePixel); // Turn that bit on.
+
         } else { // This is root
             this.root = this;
             leaves = new LinkedList<>();
             leaves.add(this);
             this.totalNodes = 0;
+            treeEssentials = new TreeEssentials(picturesSet.size());
         }
     }
 
@@ -112,7 +115,17 @@ public class Tree {
                 // One function that "splits" the picture,
                 // While calculating the sums of the two arrays (left and right)
                 // And calculating the total entropy
-                double newEntropy = getNewEntropy(i);
+                double newEntropy;
+
+                if(root.treeEssentials.pictureSetPointers[picturesSet.size()] != null &&
+                    root.treeEssentials.pictureSetPointers[picturesSet.size()] == picturesSet &&
+                root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] != Double.NEGATIVE_INFINITY) {
+                    newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i];
+                } else {
+                    newEntropy = getNewEntropy(i);
+                    root.treeEssentials.pictureSetPointers[picturesSet.size()] = picturesSet;
+                    root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] = newEntropy;
+                }
                 if (newEntropy < minEntropy) {
                     minEntropy = newEntropy;
                     minEntropyQuest = i;

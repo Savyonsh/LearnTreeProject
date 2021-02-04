@@ -3,14 +3,23 @@ import java.util.List;
 
 public class Utils {
 
+    public class Pair<T1, T2> {
+        T1 car;
+        T2 cdr;
+
+        public Pair(T1 car, T2 cdr) {
+            this.car = car;
+            this.cdr = cdr;
+        }
+    }
+
     public static final int VEC_SIZE = 784;
-    //public static int[][][] calculatedEntropyValues = new int[10][VEC_SIZE][VEC_SIZE];
 
     static int mostFrequent(int[] arr) {
         return mostFrequent(arr, arr.length);
     }
-    static int mostFrequent(int[] arr, int n)
-    {
+
+    static int mostFrequent(int[] arr, int n) {
         // Sort the array
         Arrays.sort(arr);
 
@@ -19,14 +28,11 @@ public class Utils {
         int max_count = 1, res = arr[0];
         int curr_count = 1;
 
-        for (int i = 1; i < n; i++)
-        {
+        for (int i = 1; i < n; i++) {
             if (arr[i] == arr[i - 1])
                 curr_count++;
-            else
-            {
-                if (curr_count > max_count)
-                {
+            else {
+                if (curr_count > max_count) {
                     max_count = curr_count;
                     res = arr[i - 1];
                 }
@@ -35,22 +41,20 @@ public class Utils {
         }
 
         // If last element is most frequent
-        if (curr_count > max_count)
-        {
+        if (curr_count > max_count) {
             max_count = curr_count;
             res = arr[n - 1];
         }
 
         return res;
     }
-
-    static int getLabelsData(List<Picture> picSet, int[] output, int[] oFrequentLabel){
+/*
+    static int getLabelsData(List<Picture> picSet, int[] output, int[] oFrequentLabel) {
         int sum = 0;
         int maxLabelValue = Integer.MIN_VALUE;
-        for (Picture pic: picSet) {
+        for (Picture pic : picSet) {
             output[pic.label]++;
-            if(output[pic.label] > maxLabelValue)
-            {
+            if (output[pic.label] > maxLabelValue) {
                 maxLabelValue = output[pic.label];
                 oFrequentLabel[0] = pic.label;
             }
@@ -59,14 +63,14 @@ public class Utils {
         return sum;
     }
 
-    static int getMaxIndex(int[] arr){
+    static int getMaxIndex(int[] arr) {
         int max = 0;
         for (int i = 1; i < arr.length; i++) {
-            if(arr[i]>= arr[max])
+            if (arr[i] >= arr[max])
                 max = i;
         }
         return max;
-    }
+    }*/
 
     static double calculateEntropy(int[] arr, double nl) {
         double entropy = 0;
