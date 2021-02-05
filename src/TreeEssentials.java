@@ -23,7 +23,7 @@ public class TreeEssentials {
         setRecurrencesArray(pictureSet);
     }
 
-    private void setRecurrencesArray(List<Picture> validationSet) {
+    public void setRecurrencesArray(List<Picture> validationSet) {
         boolean allLeft = true;
         boolean allRight = true;
         for (int i = 0; i < Utils.VEC_SIZE; i++) {

@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/TreeEssentials/TreeEssentials.iml" filepath="$PROJECT_DIR$/TreeEssentials/TreeEssentials.iml" />
       <module fileurl="file://$PROJECT_DIR$/learntree.iml" filepath="$PROJECT_DIR$/learntree.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Predict/predict.iml" filepath="$PROJECT_DIR$/Predict/predict.iml" />
     </modules>
   </component>
 </project>

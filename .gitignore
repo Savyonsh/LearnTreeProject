@@ -1,0 +1,16 @@
+/out/
+/.idea/
+/_windows/
+/codestyles/
+/keymaps/
+/colors.scheme.xml
+/debugger.xml
+/editor.xml
+/filetypes.xml
+/jdk.table.xml
+/learntree.iml
+/mnist_train.csv
+/project.default.xml
+/updates.xml
+/vcs.xml
+/wsl.distributions.xml

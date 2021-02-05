@@ -37,36 +37,32 @@ public class Predict {
         myReader.close();
     }
 
-    private static PredictTree parseTree(String[] treeStr){
-        PredictTree root = new PredictTree(null,-1, new Question(Integer.parseInt(treeStr[0])));
+    private static PredictTree parseTree(String[] treeStr) {
+        PredictTree root = new PredictTree(null, -1, new Question(Integer.parseInt(treeStr[0])));
         PredictTree currentTree = root;
         int i = 1;
-        while(i< treeStr.length){
-            if(currentTree.getLeftTree() == null){
-                if(treeStr[i].charAt(0) == 'L') {
-                    PredictTree tree = new PredictTree(currentTree, treeStr[i].charAt(1)-'0', null);
+        while (i < treeStr.length) {
+            if (currentTree.getLeftTree() == null) {
+                if (treeStr[i].charAt(0) == 'L') {
+                    PredictTree tree = new PredictTree(currentTree, treeStr[i].charAt(1) - '0', null);
                     currentTree.setLeftTree(tree);
-                }
-                else{
+                } else {
                     PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i])));
                     currentTree.setLeftTree(tree);
                     currentTree = tree;
                 }
                 i++;
-            }
-            else if(currentTree.getRightTree() == null){
-                if(treeStr[i].charAt(0) == 'L') {
-                    currentTree.setRightTree(new PredictTree(currentTree, treeStr[i].charAt(1)-'0', null));
+            } else if (currentTree.getRightTree() == null) {
+                if (treeStr[i].charAt(0) == 'L') {
+                    currentTree.setRightTree(new PredictTree(currentTree, treeStr[i].charAt(1) - '0', null));
                     currentTree = currentTree.parent;
-                }
-                else{
+                } else {
                     PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i])));
                     currentTree.setRightTree(tree);
                     currentTree = currentTree.getRightTree();
                 }
                 i++;
-            }
-            else if(currentTree.parent!= null){
+            } else if (currentTree.parent != null) {
                 currentTree = currentTree.parent;
             }
         }
@@ -74,18 +70,18 @@ public class Predict {
         return root;
     }
 
-    private static double predict(List<Picture> testSet, PredictTree tree){
+    private static double predict(List<Picture> testSet, PredictTree tree) {
         double right = 0;
         double total = 0;
-        for (Picture pic: testSet) {
+        for (Picture pic : testSet) {
             int prediction = tree.predict(pic.pixels);
             System.out.println(prediction);
-            if(prediction == pic.label) {
+            if (prediction == pic.label) {
                 right++;
             }
             total++;
         }
 
-        return (right/total);
+        return (right / total);
     }
 }
