@@ -3,7 +3,6 @@
     <output-path>$PROJECT_DIR$/Jars</output-path>
     <root id="archive" name="predict.jar">
       <element id="module-output" name="predict" />
-      <element id="module-output" name="TreeEssentials" />
     </root>
   </artifact>
 </component>

@@ -1,9 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" name="learntree:jar">
-    <output-path>$PROJECT_DIR$/Jars</output-path>
-    <root id="archive" name="learntree.jar">
-      <element id="module-output" name="learntree" />
-      <element id="module-output" name="TreeEssentials" />
-    </root>
-  </artifact>
-</component>
