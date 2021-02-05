@@ -1,3 +1,5 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
@@ -9,12 +11,25 @@ public class Program {
 
     Instant start = Instant.now();
 
-    public void run(String inputFileName, double validPercent, int maxPowTwo) throws IOException {
+    public void run(String inputFileName, String outputFileName,  double validPercent, int maxPowTwo) throws IOException {
         List<Picture> validationSet = new LinkedList<>();
         List<Picture> trainingSet = new LinkedList<>();
 
         setValidationAndTrainingSet(inputFileName, validationSet, trainingSet, validPercent);
-        runTreeOnTrainingSet(trainingSet, getTreeSize(maxPowTwo, validationSet));
+        Tree decisionTree = runTreeOnTrainingSet(trainingSet, getTreeSize(maxPowTwo, validationSet));
+        write(decisionTree, outputFileName);
+    }
+
+    private void write(Tree tree, String path) throws IOException {
+            String str = tree.toString();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(path));
+            try {
+                writer.write(str);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            writer.close();
+//        System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
     }
 
     private void setValidationAndTrainingSet(String inputFileName, List<Picture> validationSet,
@@ -48,22 +63,23 @@ public class Program {
                 bestSuccessRate = currentSuccessRate;
             }
         }
-        System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
-        System.out.println("debug: best size: " + (int) bestSize);
-        System.out.printf("debug: successRate: %.3f\n", bestSuccessRate);
+//        System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
+//        System.out.println("debug: best size: " + (int) bestSize);
+//        System.out.printf("debug: successRate: %.3f\n", bestSuccessRate);
         return (int) bestSize;
     }
 
-    private void runTreeOnTrainingSet(List<Picture> trainingSet, int treeSize) {
+    private Tree runTreeOnTrainingSet(List<Picture> trainingSet, int treeSize) {
         Tree predicationTree = new Tree(trainingSet, null, null, treeSize);
         do {
             predicationTree.act();
         } while (predicationTree.root.totalNodes < treeSize);
 
-        System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
+//        System.out.println("debug: total time: " + Duration.between(start, Instant.now()).toSeconds());
         System.out.println("num: " + trainingSet.size());
         System.out.println("error: " + (100 - Math.round(predicationTree.getSuccessRate() * 100)));
         System.out.println("size: " + treeSize);
+        return  predicationTree;
     }
 
 

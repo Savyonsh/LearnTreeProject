@@ -45,24 +45,7 @@ public class Tree {
         }
     }
 
-    public int predict(int[] pixels){
-        Tree currentTree = this;
-        while(currentTree.leftTree != null || currentTree.rightTree != null){
-            if(Question.ask(pixels, currentTree.nodePixel)){
-                if(currentTree.leftTree != null)
-                    currentTree = currentTree.leftTree;
-                else
-                    return currentTree.label;
-            }
-            else{
-                if(currentTree.rightTree != null)
-                    currentTree = currentTree.rightTree;
-                else
-                    return currentTree.label;
-            }
-        }
-        return currentTree.label;
-    }
+
     /**
      * This method is called by a leaf and it splits it to two different leaves and it enlarged the whole tree.
      *
@@ -197,23 +180,22 @@ public class Tree {
 
     }
 
-/*
     public String toString() {
         String str = "";
-        String leftStr = "left: ";
-        String rightStr = "right: ";
+        String leftStr = "";
+        String rightStr = "";
         if (this.leftTree == null && this.rightTree == null) {
-            str = "label: " + this.label;
+            str = "L" + this.label ;
         } else {
+            str += this.nodePixel;
             if (this.leftTree != null)
                 leftStr += this.leftTree.toString();
             if (this.rightTree != null)
                 rightStr += this.rightTree.toString();
-            str = this.nodeCondition.toString() + "\n" + leftStr + "\n" + rightStr;
+            str += " " + leftStr + " " + rightStr;
         }
         return str;
     }
-*/
 
     /**
      * Function that goes over all the leaves and
