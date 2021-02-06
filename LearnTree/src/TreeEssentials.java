@@ -51,6 +51,7 @@ public class TreeEssentials {
             }
             allLeft = true;
             allRight = true;
+            //
         }
     }
 }

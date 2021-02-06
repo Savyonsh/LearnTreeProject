@@ -1,5 +1,5 @@
 public class Picture {
-
+//
     int label;
     int[] pixels;
 

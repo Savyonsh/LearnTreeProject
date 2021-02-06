@@ -2,6 +2,7 @@ public class QuestionV2 {
 
     int[] setOfPixels;
     String question;
+    //
 
     public QuestionV2(int[] setOfPixels, String question) {
         this.setOfPixels = setOfPixels;

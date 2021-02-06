@@ -74,7 +74,7 @@ public class Program {
         return (int) bestSize;
     }
 
-    private Tree runTreeOnTrainingSet(List<Picture> trainingSet, int treeSize) {
+    private Tree runTreeOnTrainingSet(List<Picture> trainingSet, int treeSize) {//
         Tree predicationTree = new Tree(trainingSet, null, null, treeSize, this.version);
         do {
             predicationTree.act();

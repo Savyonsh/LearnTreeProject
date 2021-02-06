@@ -12,7 +12,7 @@ public class Question {
             return arr[num] >= 128;
         return true;
     }
-
+//
     public static boolean ask(int[] arr, int pixelNum, int version) {
         if (version == 1)
             return arr[pixelNum] >= 128;
