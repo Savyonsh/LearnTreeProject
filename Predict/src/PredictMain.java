@@ -26,7 +26,7 @@ public class PredictMain {
         List<Picture> testSet = new LinkedList<>();
         setTestSet(args[1], testSet);
         double accuracy = predict(testSet, tree);
-//        System.out.println("accuracy: " + accuracy);
+        System.out.println("accuracy: " + accuracy);
     }
 
     private static void setTestSet(String inputFileName, List<Picture> testSet) throws IOException {
@@ -39,16 +39,17 @@ public class PredictMain {
     }
 
     private static PredictTree parseTree(String[] treeStr) {
-        PredictTree root = new PredictTree(null, -1, new Question(Integer.parseInt(treeStr[0])));
+        int version = Integer.parseInt(treeStr[0]);
+        PredictTree root = new PredictTree(null, -1, new Question(Integer.parseInt(treeStr[1]), version));
         PredictTree currentTree = root;
-        int i = 1;
+        int i = 2;
         while (i < treeStr.length) {
             if (currentTree.getLeftTree() == null) {
                 if (treeStr[i].charAt(0) == 'L') {
                     PredictTree tree = new PredictTree(currentTree, treeStr[i].charAt(1) - '0', null);
                     currentTree.setLeftTree(tree);
                 } else {
-                    PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i])));
+                    PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i]), version));
                     currentTree.setLeftTree(tree);
                     currentTree = tree;
                 }
@@ -58,7 +59,7 @@ public class PredictMain {
                     currentTree.setRightTree(new PredictTree(currentTree, treeStr[i].charAt(1) - '0', null));
                     currentTree = currentTree.parent;
                 } else {
-                    PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i])));
+                    PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i]), version));
                     currentTree.setRightTree(tree);
                     currentTree = currentTree.getRightTree();
                 }

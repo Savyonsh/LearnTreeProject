@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class Tree {
+    int version;
     Tree parent;
     Tree leftTree;
     Tree rightTree;
@@ -22,7 +23,8 @@ public class Tree {
     BitSet usedPixels;
     List<Picture> picturesSet;
 
-    public Tree(List<Picture> picturesSet, Tree parent, Tree root, int futureSize) {
+    public Tree(List<Picture> picturesSet, Tree parent, Tree root, int futureSize, int version) {
+        this.version = version;
         this.parent = parent;
         this.root = root;
         this.picturesSet = picturesSet;
@@ -56,8 +58,8 @@ public class Tree {
         List<Picture> picsLeft = new LinkedList<>();
         List<Picture> picsRight = new LinkedList<>();
         splitPicListByQuestion(pixel, picsLeft, picsRight);
-        this.leftTree = new Tree(picsLeft, this, this.root, 0);
-        this.rightTree = new Tree(picsRight, this, this.root, 0);
+        this.leftTree = new Tree(picsLeft, this, this.root, 0, this.version);
+        this.rightTree = new Tree(picsRight, this, this.root, 0, this.version);
         root.leaves[leafIndex] = this.leftTree;
         root.leaves[root.leavesIndex] = this.rightTree;
         root.leavesIndex++;
@@ -73,7 +75,7 @@ public class Tree {
      */
     private void splitPicListByQuestion(int pixel, List<Picture> left, List<Picture> right) {
         for (Picture pic : picturesSet) {
-            if (Question.ask(pic.pixels, pixel))
+            if (Question.ask(pic.pixels, pixel, this.version))
                 left.add(pic);
             else
                 right.add(pic);
@@ -161,20 +163,6 @@ public class Tree {
             }
         }
 
-//        for (Tree leaf : this.leaves) {
-//            double nl = leaf.labelSum;
-//            double HX = leaf.findingBest();
-//            double HL = Utils.calculateEntropy(leaf.labels, nl);
-//            double IG = HL - HX;
-//            double newIG = nl * IG;
-//
-//            if (newIG > bestIG) {
-//                bestIG = newIG;
-//                bestLeaf = leaf;
-//                bestQuestion = leaf.nodePixel;
-//            }
-//        }
-
         if (bestLeaf != null)
             bestLeaf.creatingTwoLeaves(bestQuestion, bestLeafIndex);
 
@@ -249,7 +237,7 @@ public class Tree {
 
         int leftNl = 0, rightNl = 0;
         for (Picture pic : picturesSet) {
-            if (Question.ask(pic.pixels, pixel)) {
+            if (Question.ask(pic.pixels, pixel, this.version)) {
                 leftLabels[pic.label]++;
                 leftNl++;
             } else {
