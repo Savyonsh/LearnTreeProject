@@ -1,6 +1,4 @@
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class TreeEssentials {
 
@@ -8,6 +6,8 @@ public class TreeEssentials {
     List<Picture>[] pictureSetPointers;
     double[][] pictureSetPointerPixelEntropyArray;
     double[][] pictureSetPointerTypesArray;
+    List<QuestionV2> questionV2List;
+
     int[] vectorTypes;
     int typeOneIndex;
     int typeTwoIndex;
@@ -21,6 +21,16 @@ public class TreeEssentials {
         typeOneIndex = -1;
         typeTwoIndex = -1;
         setRecurrencesArray(pictureSet);
+        questionV2List = new LinkedList<>();
+        questionV2List.add(new QuestionV2(new int[]{232, 180, 205}, "Wide Round top"));
+        questionV2List.add(new QuestionV2(new int[]{180, 70, 200}, "Narrow Round top"));
+        questionV2List.add(new QuestionV2(new int[]{182, 209, 236,263, 290, 319}, "Diagonal line"));
+        questionV2List.add(new QuestionV2(new int[]{176, 232, 288, 344, 400}, "Colored straight left line"));
+        questionV2List.add(new QuestionV2(new int[]{289, 294, 299}, "Colored horizontal center line"));
+        questionV2List.add(new QuestionV2(new int[]{123, 179, 235, 291, 347, 403, 459}, "Colored vertical line in middle"));
+        questionV2List.add(new QuestionV2(new int[]{455, 465, 475, 485}, "Flat end"));
+        questionV2List.add(new QuestionV2(new int[]{177, 178, 179, 206, 207, 208, 233, 234, 235}, "Colored high center"));
+        questionV2List.add(new QuestionV2(new int[]{317, 318, 319, 345, 346, 347, 373, 374, 375}, "Colored low center"));
     }
 
     public void setRecurrencesArray(List<Picture> validationSet) {
@@ -31,13 +41,13 @@ public class TreeEssentials {
                 allLeft = allLeft && picture.pixels[i] >= 128;
                 allRight = allRight && picture.pixels[i] < 128;
             }
-            if(allLeft) {
+            if (allLeft) {
                 vectorTypes[i] = 1;
-                if(typeOneIndex == -1) typeOneIndex = i;
+                if (typeOneIndex == -1) typeOneIndex = i;
             }
-            if(allRight) {
+            if (allRight) {
                 vectorTypes[i] = 2;
-                if(typeTwoIndex == -1) typeTwoIndex = i;
+                if (typeTwoIndex == -1) typeTwoIndex = i;
             }
             allLeft = true;
             allRight = true;

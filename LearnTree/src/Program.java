@@ -12,13 +12,14 @@ public class Program {
     Instant start = Instant.now();
     int version;
 
-    public void run(int version, String inputFileName, String outputFileName,  double validPercent, int maxPowTwo) throws IOException {
+    public void run(int version, String inputFileName, String outputFileName, double validPercent, int maxPowTwo) throws IOException {
         this.version = version;
         List<Picture> validationSet = new LinkedList<>();
         List<Picture> trainingSet = new LinkedList<>();
 
         setValidationAndTrainingSet(inputFileName, validationSet, trainingSet, validPercent);
         Tree decisionTree = runTreeOnTrainingSet(trainingSet, getTreeSize(maxPowTwo, validationSet));
+        if (decisionTree == null) return;
         write(decisionTree, outputFileName);
 
     }
@@ -83,7 +84,7 @@ public class Program {
         System.out.println("num: " + trainingSet.size());
         System.out.println("error: " + (100 - Math.round(predicationTree.getSuccessRate() * 100)));
         System.out.println("size: " + treeSize);
-        return  predicationTree;
+        return predicationTree;
     }
 
 

@@ -3,7 +3,7 @@ import java.util.List;
 
 public class Utils {
 
-    public class Pair<T1, T2> {
+    public static class Pair<T1, T2> {
         T1 car;
         T2 cdr;
 

@@ -15,6 +15,7 @@ public class Tree {
 
     // Inner nodes
     int nodePixel;
+    QuestionV2 questionV2;
     int label;
 
     // Leaves
@@ -66,6 +67,19 @@ public class Tree {
         root.totalNodes++;
     }
 
+    private void creatingTwoLeaves(QuestionV2 questionV2, int leafIndex) {
+        this.questionV2 = questionV2;
+        List<Picture> picsLeft = new LinkedList<>();
+        List<Picture> picsRight = new LinkedList<>();
+        splitPicListByQuestion(questionV2, picsLeft, picsRight);
+        this.leftTree = new Tree(picsLeft, this, this.root, 0, this.version);
+        this.rightTree = new Tree(picsRight, this, this.root, 0, this.version);
+        root.leaves[leafIndex] = this.leftTree;
+        root.leaves[root.leavesIndex] = this.rightTree;
+        root.leavesIndex++;
+        root.totalNodes++;
+    }
+
     /**
      * This method split the pictureSet of the node to two different pictureSets by a condition
      *
@@ -82,6 +96,14 @@ public class Tree {
         }
     }
 
+    private void splitPicListByQuestion(QuestionV2 questionV2, List<Picture> left, List<Picture> right) {
+        for (Picture pic : picturesSet) {
+            if (questionV2.ask(pic.pixels))
+                left.add(pic);
+            else
+                right.add(pic);
+        }
+    }
 
     /**
      * This method find the best question for a specific leaf, means it only been called by a leaf.
@@ -94,42 +116,54 @@ public class Tree {
         if (leftTree == null && rightTree == null) {
             int minEntropyQuest = 0;
             double minEntropy = Integer.MAX_VALUE;
+            if (root.treeEssentials.questionV2List.isEmpty()) {
+                for (int i = 0; i < Utils.VEC_SIZE; i++) {
+                    // Check if the bit on index i is 1 - i.e on, and
+                    // already been used by parent.
+                    if (usedPixels.get(i)) continue;
 
-            for (int i = 0; i < Utils.VEC_SIZE; i++) {
-                // Check if the bit on index i is 1 - i.e on, and
-                // already been used by parent.
-                if (usedPixels.get(i)) continue;
+                    double newEntropy = -1;
 
-
-                double newEntropy = -1;
-
-                if(root.treeEssentials.pictureSetPointers[picturesSet.size()] == picturesSet) {
-                    // Going to be all left
-                    if(root.treeEssentials.vectorTypes[i] == 1 &&
-                            root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex] != Double.NEGATIVE_INFINITY)
-                    newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex];
-                    // Going to be all right
-                    else if(root.treeEssentials.vectorTypes[i] == 2 &&
-                            root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex] != Double.NEGATIVE_INFINITY)
-                        newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex];
-                    else if (root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] != Double.NEGATIVE_INFINITY)
-                        newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i];
+                    if (root.treeEssentials.pictureSetPointers[picturesSet.size()] == picturesSet) {
+                        // Going to be all left
+                        if (root.treeEssentials.vectorTypes[i] == 1 &&
+                                root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex] != Double.NEGATIVE_INFINITY)
+                            newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex];
+                            // Going to be all right
+                        else if (root.treeEssentials.vectorTypes[i] == 2 &&
+                                root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex] != Double.NEGATIVE_INFINITY)
+                            newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex];
+                        else if (root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] != Double.NEGATIVE_INFINITY)
+                            newEntropy = root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i];
+                    }
+                    if (newEntropy == -1) {
+                        newEntropy = getNewEntropy(i);
+                        root.treeEssentials.pictureSetPointers[picturesSet.size()] = picturesSet;
+                        root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] = newEntropy;
+                        if (root.treeEssentials.vectorTypes[i] == 1)
+                            root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex] = newEntropy;
+                        else if (root.treeEssentials.vectorTypes[i] == 2)
+                            root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex] = newEntropy;
+                    }
+                    if (newEntropy < minEntropy) {
+                        minEntropy = newEntropy;
+                        minEntropyQuest = i;
+                    }
                 }
-                if(newEntropy == -1) {
-                    newEntropy = getNewEntropy(i);
-                    root.treeEssentials.pictureSetPointers[picturesSet.size()] = picturesSet;
-                    root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][i] = newEntropy;
-                    if (root.treeEssentials.vectorTypes[i] == 1)
-                        root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeOneIndex] = newEntropy;
-                    else if (root.treeEssentials.vectorTypes[i] == 2)
-                        root.treeEssentials.pictureSetPointerPixelEntropyArray[picturesSet.size()][root.treeEssentials.typeTwoIndex] = newEntropy;
+                nodePixel = minEntropyQuest;
+
+            } else {
+                QuestionV2 chosenQ = null;
+                for (QuestionV2 q : root.treeEssentials.questionV2List) {
+                    double currentEntropy = getNewEntropy(q);
+                    if (currentEntropy < minEntropy){
+                        minEntropy = currentEntropy;
+                        chosenQ = q;
+                    }
                 }
-                if (newEntropy < minEntropy) {
-                    minEntropy = newEntropy;
-                    minEntropyQuest = i;
-                }
+                root.treeEssentials.questionV2List.remove(chosenQ);
+                questionV2 = chosenQ;
             }
-            nodePixel = minEntropyQuest;
             return minEntropy;
         }
         return 0;
@@ -146,6 +180,7 @@ public class Tree {
         Tree bestLeaf = null;
         int bestLeafIndex = 0;
         int bestQuestion = 0;
+        QuestionV2 bestQuestionV2 = null;
 
         for (int j = 0; j < this.leavesIndex; j++) {
             Tree leaf = this.leaves[j];
@@ -160,11 +195,14 @@ public class Tree {
                 bestLeaf = leaf;
                 bestLeafIndex = j;
                 bestQuestion = leaf.nodePixel;
+                bestQuestionV2 = leaf.questionV2;
             }
         }
 
         if (bestLeaf != null)
+            if(bestQuestionV2 == null)
             bestLeaf.creatingTwoLeaves(bestQuestion, bestLeafIndex);
+            else bestLeaf.creatingTwoLeaves(bestQuestionV2, bestLeafIndex);
 
     }
 
@@ -238,6 +276,29 @@ public class Tree {
         int leftNl = 0, rightNl = 0;
         for (Picture pic : picturesSet) {
             if (Question.ask(pic.pixels, pixel, this.version)) {
+                leftLabels[pic.label]++;
+                leftNl++;
+            } else {
+                rightLabels[pic.label]++;
+                rightNl++;
+            }
+        }
+        double leftEntropy = Utils.calculateEntropy(leftLabels, leftNl);
+        double rightEntropy = Utils.calculateEntropy(rightLabels, rightNl);
+        entropy += leftEntropy * leftNl / labelSum;
+        entropy += rightEntropy * rightNl / labelSum;
+        return entropy;
+    }
+
+
+    private double getNewEntropy(QuestionV2 questionV2) {
+        int[] rightLabels = new int[10];
+        int[] leftLabels = new int[10];
+        double entropy = 0;
+
+        int leftNl = 0, rightNl = 0;
+        for (Picture pic : picturesSet) {
+            if (questionV2.ask(pic.pixels)) {
                 leftLabels[pic.label]++;
                 leftNl++;
             } else {
