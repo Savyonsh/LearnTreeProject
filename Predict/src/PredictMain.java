@@ -29,6 +29,21 @@ public class PredictMain {
         System.out.println("accuracy: " + accuracy);
     }
 
+    private static Map<Integer, int[]> createMap(){
+        int key = Utils.VEC_SIZE;
+        Map<Integer, int[]> questionV2Map = new HashMap<>();
+        questionV2Map.put(key, new int[]{232, 180, 205});
+        questionV2Map.put(key+1, new int[]{180, 70, 200});
+        questionV2Map.put(key+2, new int[]{182, 209, 236,263, 290, 319});
+        questionV2Map.put(key+3, new int[]{176, 232, 288, 344, 400});
+        questionV2Map.put(key+4, new int[]{289, 294, 299});
+        questionV2Map.put(key+5, new int[]{123, 179, 235, 291, 347, 403, 459});
+        questionV2Map.put(key+6, new int[]{455, 465, 475, 485});
+        questionV2Map.put(key+7, new int[]{177, 178, 179, 206, 207, 208, 233, 234, 235});
+        questionV2Map.put(key+8, new int[]{317, 318, 319, 345, 346, 347, 373, 374, 375});
+        return questionV2Map;
+    }
+
     private static void setTestSet(String inputFileName, List<Picture> testSet) throws IOException {
         CSVReader myReader = new CSVReader(inputFileName);
         while (myReader.hasNextLine()) {
@@ -39,6 +54,7 @@ public class PredictMain {
     }
 
     private static PredictTree parseTree(String[] treeStr) {
+        Map<Integer, int[]> specialsQuest =  createMap();
         int version = Integer.parseInt(treeStr[0]);
         PredictTree root = new PredictTree(null, -1, new Question(Integer.parseInt(treeStr[1]), version));
         PredictTree currentTree = root;
@@ -49,7 +65,12 @@ public class PredictMain {
                     PredictTree tree = new PredictTree(currentTree, treeStr[i].charAt(1) - '0', null);
                     currentTree.setLeftTree(tree);
                 } else {
-                    PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i]), version));
+                    int pix =  Integer.parseInt(treeStr[i]);
+                    PredictTree tree;
+                    if(pix < Utils.VEC_SIZE)
+                        tree =  new PredictTree(currentTree, -1, new Question(pix, version));
+                    else
+                        tree =  new PredictTree(currentTree, -1, new Question(specialsQuest.get(pix)));
                     currentTree.setLeftTree(tree);
                     currentTree = tree;
                 }
@@ -59,7 +80,12 @@ public class PredictMain {
                     currentTree.setRightTree(new PredictTree(currentTree, treeStr[i].charAt(1) - '0', null));
                     currentTree = currentTree.parent;
                 } else {
-                    PredictTree tree = new PredictTree(currentTree, -1, new Question(Integer.parseInt(treeStr[i]), version));
+                    int pix =  Integer.parseInt(treeStr[i]);
+                    PredictTree tree;
+                    if(pix < Utils.VEC_SIZE)
+                        tree =  new PredictTree(currentTree, -1, new Question(pix, version));
+                    else
+                        tree =  new PredictTree(currentTree, -1, new Question(specialsQuest.get(pix)));
                     currentTree.setRightTree(tree);
                     currentTree = currentTree.getRightTree();
                 }

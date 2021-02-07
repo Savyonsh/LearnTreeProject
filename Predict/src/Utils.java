@@ -3,15 +3,15 @@ import java.util.List;
 
 public class Utils {
 
-    public static class Pair<T1, T2> {
-        T1 car;
-        T2 cdr;
-
-        public Pair(T1 car, T2 cdr) {
-            this.car = car;
-            this.cdr = cdr;
-        }
-    }
+//    public static class Pair<T1, T2> {
+//        T1 car;
+//        T2 cdr;
+//
+//        public Pair(T1 car, T2 cdr) {
+//            this.car = car;
+//            this.cdr = cdr;
+//        }
+//    }
 
     public static final int VEC_SIZE = 784;
 
