@@ -203,7 +203,6 @@ public class Tree {
         Tree bestLeaf = null;
         int bestLeafIndex = 0;
         int bestQuestion = 0;
-        QuestionV2 bestQuestionV2 = null;
 
         for (int j = 0; j < this.leavesIndex; j++) {
             Tree leaf = this.leaves[j];
